@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indeed求人作る君</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <span class="logo">📋</span>
+  <h1>Indeed求人作る君</h1>
+  <span class="badge">AI搭載</span>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="create">✏️ 求人作成</button>
+  <button class="tab-btn" data-tab="list">📂 保存済み求人</button>
+</div>
+
+<main>
+  <!-- ===== TAB: 求人作成 ===== -->
+  <div class="tab-panel active" id="tab-create">
+    <div class="create-layout">
+
+      <!-- Left: Input -->
+      <div>
+        <div class="card">
+          <div class="card-title">企業情報・依頼内容の入力</div>
+
+          <div class="form-group">
+            <label>企業URL <span class="required">必須</span></label>
+            <input type="url" id="company_url" placeholder="https://www.example.co.jp">
+          </div>
+
+          <div class="form-group">
+            <label>採用依頼文（メール本文など） <span class="required">必須</span></label>
+            <textarea id="request_text" rows="8"
+              placeholder="依頼メールの内容をそのまま貼り付けてください。&#10;&#10;例：&#10;お世話になります。&#10;この度、営業職の採用を検討しております。&#10;勤務地：東京都渋谷区&#10;給与：月給25〜35万円&#10;雇用形態：正社員&#10;..."></textarea>
+          </div>
+
+          <button class="extra-toggle" onclick="toggleExtra(this)">
+            ＋ 追加情報を入力する（応募先URL・担当者情報など）
+          </button>
+          <div class="extra-fields" id="extra-fields">
+            <div class="form-group">
+              <label>応募URL <span class="optional">任意</span></label>
+              <input type="url" id="application_url" placeholder="https://...">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>担当者名 <span class="optional">任意</span></label>
+                <input type="text" id="contact_name" placeholder="山田 太郎">
+              </div>
+              <div class="form-group">
+                <label>担当者電話番号 <span class="optional">任意</span></label>
+                <input type="tel" id="contact_phone" placeholder="03-1234-5678">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>担当者メール <span class="optional">任意</span></label>
+              <input type="email" id="contact_email" placeholder="recruit@example.co.jp">
+            </div>
+          </div>
+
+          <button class="btn btn-generate" id="generate-btn" onclick="generateJob()">
+            <div class="spinner"></div>
+            <span class="btn-label">🤖 AIで求人票を生成する</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Preview -->
+      <div>
+        <div class="card" id="preview-card">
+          <div class="card-title">生成プレビュー・編集</div>
+          <div id="preview-empty" class="preview-empty">
+            <div class="icon">✨</div>
+            <p>左のフォームに企業URLと依頼文を入力して<br>「AIで求人票を生成する」を押してください</p>
+          </div>
+          <div id="preview-form" style="display:none">
+
+            <div class="section-label">基本情報</div>
+
+            <div class="form-group">
+              <label>求人タイトル</label>
+              <input type="text" id="p_job_title">
+            </div>
+            <div class="form-group">
+              <label>会社名</label>
+              <input type="text" id="p_company_name">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>都道府県</label>
+                <input type="text" id="p_prefecture">
+              </div>
+              <div class="form-group">
+                <label>市区町村</label>
+                <input type="text" id="p_city">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>雇用形態</label>
+              <select id="p_employment_type">
+                <option>正社員</option>
+                <option>契約社員</option>
+                <option>パート・アルバイト</option>
+                <option>派遣社員</option>
+                <option>業務委託</option>
+              </select>
+            </div>
+
+            <div class="section-label" style="margin-top:16px">給与</div>
+            <div class="salary-row">
+              <div class="form-group">
+                <label>下限</label>
+                <input type="number" id="p_salary_min" placeholder="例: 250000">
+              </div>
+              <div class="form-group">
+                <label>上限</label>
+                <input type="number" id="p_salary_max" placeholder="例: 350000">
+              </div>
+              <div class="form-group">
+                <label>単位</label>
+                <select id="p_salary_type">
+                  <option>月給</option>
+                  <option>時給</option>
+                  <option>年収</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="section-label" style="margin-top:16px">アピールポイント</div>
+            <div class="appeal-tags" id="p_appeal_tags"></div>
+
+            <div class="section-label" style="margin-top:16px">詳細情報</div>
+
+            <div class="form-group">
+              <label>仕事内容</label>
+              <textarea id="p_description" rows="8"></textarea>
+            </div>
+            <div class="form-group">
+              <label>応募資格（必須）</label>
+              <textarea id="p_requirements" rows="5"></textarea>
+            </div>
+            <div class="form-group">
+              <label>歓迎スキル・経験</label>
+              <textarea id="p_preferred_skills" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label>勤務時間</label>
+              <input type="text" id="p_working_hours">
+            </div>
+            <div class="form-group">
+              <label>休日・休暇</label>
+              <textarea id="p_holidays" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label>待遇・福利厚生</label>
+              <textarea id="p_benefits" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label>選考プロセス</label>
+              <input type="text" id="p_selection_process">
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-success" onclick="saveJob()">💾 保存する</button>
+              <button class="btn btn-secondary" onclick="clearPreview()">✕ クリア</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: 保存済み求人 ===== -->
+  <div class="tab-panel" id="tab-list">
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <button class="btn btn-secondary btn-sm" onclick="toggleSelectAll()">全選択 / 解除</button>
+          <span class="selected-count" id="selected-count">0件選択中</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="exportSelected()" id="export-btn" disabled>
+          📥 選択をCSVエクスポート
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSelected()" id="delete-bulk-btn" disabled>
+          🗑 選択を削除
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="loadJobs()">🔄 更新</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="jobs-table">
+          <thead>
+            <tr>
+              <th style="width:36px"><input type="checkbox" id="check-all" onchange="onCheckAll()"></th>
+              <th>求人タイトル</th>
+              <th>会社名</th>
+              <th>勤務地</th>
+              <th>雇用形態</th>
+              <th>給与</th>
+              <th>作成日</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="jobs-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" id="jobs-empty" style="display:none">
+        <div class="icon">📭</div>
+        <p>保存済みの求人はありません</p>
+        <p style="margin-top:8px;font-size:13px;">「求人作成」タブから求人を生成・保存してください</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ===== Edit Modal ===== -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏️ 求人を編集</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="m_id">
+      <div class="form-group">
+        <label>求人タイトル</label>
+        <input type="text" id="m_job_title">
+      </div>
+      <div class="form-group">
+        <label>会社名</label>
+        <input type="text" id="m_company_name">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>都道府県</label>
+          <input type="text" id="m_prefecture">
+        </div>
+        <div class="form-group">
+          <label>市区町村</label>
+          <input type="text" id="m_city">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>雇用形態</label>
+        <select id="m_employment_type">
+          <option>正社員</option>
+          <option>契約社員</option>
+          <option>パート・アルバイト</option>
+          <option>派遣社員</option>
+          <option>業務委託</option>
+        </select>
+      </div>
+      <div class="salary-row">
+        <div class="form-group">
+          <label>給与（下限）</label>
+          <input type="number" id="m_salary_min">
+        </div>
+        <div class="form-group">
+          <label>給与（上限）</label>
+          <input type="number" id="m_salary_max">
+        </div>
+        <div class="form-group">
+          <label>給与単位</label>
+          <select id="m_salary_type">
+            <option>月給</option>
+            <option>時給</option>
+            <option>年収</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>仕事内容</label>
+        <textarea id="m_description" rows="6"></textarea>
+      </div>
+      <div class="form-group">
+        <label>応募資格</label>
+        <textarea id="m_requirements" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label>歓迎スキル</label>
+        <textarea id="m_preferred_skills" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>勤務時間</label>
+        <input type="text" id="m_working_hours">
+      </div>
+      <div class="form-group">
+        <label>休日・休暇</label>
+        <textarea id="m_holidays" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label>待遇・福利厚生</label>
+        <textarea id="m_benefits" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label>選考プロセス</label>
+        <input type="text" id="m_selection_process">
+      </div>
+      <div class="form-group">
+        <label>応募URL</label>
+        <input type="url" id="m_application_url">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-success" onclick="saveEdit()">💾 保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toasts"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
