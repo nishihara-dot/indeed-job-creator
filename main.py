@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -295,8 +295,8 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
     csv_bytes = output.getvalue().encode("shift_jis", errors="replace")
     filename = f"indeed_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
-    return StreamingResponse(
-        iter([csv_bytes]),
+    return Response(
+        content=csv_bytes,
         media_type="text/csv; charset=shift_jis",
-        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"},
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
