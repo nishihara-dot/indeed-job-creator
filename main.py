@@ -197,63 +197,106 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
     output = io.StringIO()
     writer = csv.writer(output)
 
+    # Indeed Japan 公式フォーマット（70列）
     headers = [
-        "求人タイトル",
-        "会社名",
-        "勤務地（都道府県）",
-        "勤務地（市区町村）",
-        "雇用形態",
-        "給与（下限）",
-        "給与（上限）",
-        "給与単位",
-        "仕事内容",
-        "応募資格",
-        "歓迎スキル・経験",
-        "勤務時間",
-        "休日・休暇",
-        "待遇・福利厚生",
-        "選考プロセス",
-        "応募URL",
-        "担当者名",
-        "担当者電話番号",
-        "担当者メール",
-        "会社URL",
-        "作成日",
+        "ステータス", "会社名", "職種名", "職業カテゴリー", "求人キャッチコピー",
+        "勤務地（郵便番号）", "勤務地（都道府県・市区町村・町域）", "勤務地（丁目・番地・号）", "勤務地（建物名・階数）",
+        "雇用形態", "有料職業紹介に該当",
+        "給与形態", "給与（最低額）", "給与（最高額）", "給与（表示形式）",
+        "固定残業代の有無", "固定残業代（最低額）", "固定残業代（最高額）", "固定残業代（支払い単位）",
+        "固定残業代（時間）", "固定残業代（分）", "固定残業代（超過分の追加支払への同意）",
+        "勤務形態", "平均所定労働時間", "平均所定労働時間（分）",
+        "社会保険", "社会保険（適用されない理由）",
+        "試用期間の有無", "試用期間（期間）", "試用期間（期間の単位）", "試用期間（試用期間中の労働条件）",
+        "試用期間中の給与形態", "試用期間中の給与（最低額）", "試用期間中の給与（最高額）", "試用期間中の給与（表示形式）",
+        "試用期間中の固定残業代の有無", "試用期間中の固定残業代（最低額）", "試用期間中の固定残業代（最高額）",
+        "試用期間中の固定残業代（支払い単位）", "試用期間中の固定残業代（時間）", "試用期間中の固定残業代（分）",
+        "試用期間中の固定残業代（超過分の追加支払への同意）",
+        "試用期間中の平均所定労働時間", "試用期間中の平均所定労働時間（分）", "試用期間中のその他の条件",
+        "募集要項（仕事内容）", "募集要項（アピールポイント）", "募集要項（求める人材）",
+        "募集要項（勤務時間・曜日）", "募集要項（休暇・休日）", "募集要項（勤務地の補足）",
+        "募集要項（アクセス）", "募集要項（給与の補足）", "募集要項（待遇・福利厚生）", "募集要項（その他）",
+        "掲載画像", "タグ", "タグ", "タグ",
+        "採用予定人数", "履歴書の有無",
+        "応募者に関する情報", "応募者に関する情報", "応募者に関する情報",
+        "応募用メールアドレス", "求人問い合わせ先電話番号（半角）",
+        "審査用の質問", "自動アプローチ利用設定", "自動アプローチ条件設定", "ユーザー指定ID",
     ]
     writer.writerow(headers)
 
     for job in jobs:
-        writer.writerow(
-            [
-                job.job_title or "",
-                job.company_name or "",
-                job.prefecture or "",
-                job.city or "",
-                job.employment_type or "",
-                job.salary_min or "",
-                job.salary_max or "",
-                job.salary_type or "",
-                job.description or "",
-                job.requirements or "",
-                job.preferred_skills or "",
-                job.working_hours or "",
-                job.holidays or "",
-                job.benefits or "",
-                job.selection_process or "",
-                job.application_url or "",
-                job.contact_name or "",
-                job.contact_phone or "",
-                job.contact_email or "",
-                job.company_url or "",
-                job.created_at.strftime("%Y-%m-%d") if job.created_at else "",
-            ]
-        )
+        # アピールポイントを取得
+        appeal_pts = []
+        if job.appeal_points:
+            try:
+                appeal_pts = json.loads(job.appeal_points)
+            except Exception:
+                appeal_pts = [job.appeal_points]
+        catchcopy = appeal_pts[0] if appeal_pts else ""
+        appeal_text = "\n".join(appeal_pts)
 
-    csv_bytes = output.getvalue().encode("utf-8-sig")
+        # 求める人材（必須＋歓迎）
+        requirements_combined = "\n".join(filter(None, [
+            job.requirements or "",
+            f"【歓迎】\n{job.preferred_skills}" if job.preferred_skills else "",
+        ]))
+
+        # 勤務地
+        location = "".join(filter(None, [job.prefecture or "", job.city or ""]))
+
+        row = [
+            "公開",                          # ステータス
+            job.company_name or "",          # 会社名
+            job.job_title or "",             # 職種名
+            "",                              # 職業カテゴリー
+            catchcopy,                       # 求人キャッチコピー
+            "",                              # 勤務地（郵便番号）
+            location,                        # 勤務地（都道府県・市区町村・町域）
+            "",                              # 勤務地（丁目・番地・号）
+            "",                              # 勤務地（建物名・階数）
+            job.employment_type or "",       # 雇用形態
+            "",                              # 有料職業紹介に該当
+            job.salary_type or "",           # 給与形態
+            job.salary_min or "",            # 給与（最低額）
+            job.salary_max or "",            # 給与（最高額）
+            "",                              # 給与（表示形式）
+            "", "", "", "", "", "", "",      # 固定残業代関連（7列）
+            "",                              # 勤務形態
+            "", "",                          # 平均所定労働時間
+            "", "",                          # 社会保険
+            "", "", "", "",                  # 試用期間
+            "", "", "", "",                  # 試用期間中の給与
+            "", "", "", "", "", "", "",      # 試用期間中の固定残業代（7列）
+            "", "",                          # 試用期間中の平均所定労働時間
+            "",                              # 試用期間中のその他の条件
+            job.description or "",           # 募集要項（仕事内容）
+            appeal_text,                     # 募集要項（アピールポイント）
+            requirements_combined,           # 募集要項（求める人材）
+            job.working_hours or "",         # 募集要項（勤務時間・曜日）
+            job.holidays or "",              # 募集要項（休暇・休日）
+            "",                              # 募集要項（勤務地の補足）
+            "",                              # 募集要項（アクセス）
+            "",                              # 募集要項（給与の補足）
+            job.benefits or "",              # 募集要項（待遇・福利厚生）
+            job.selection_process or "",     # 募集要項（その他）
+            "",                              # 掲載画像
+            "", "", "",                      # タグ（3列）
+            "",                              # 採用予定人数
+            "",                              # 履歴書の有無
+            "", "", "",                      # 応募者に関する情報（3列）
+            job.contact_email or "",         # 応募用メールアドレス
+            job.contact_phone or "",         # 求人問い合わせ先電話番号
+            "", "", "",                      # 審査用の質問・自動アプローチ設定
+            "",                              # ユーザー指定ID
+        ]
+        writer.writerow(row)
+
+    # Indeed Japan テンプレートはShift-JIS
+    csv_bytes = output.getvalue().encode("shift_jis", errors="replace")
     filename = f"indeed_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
     return StreamingResponse(
         iter([csv_bytes]),
-        media_type="text/csv",
+        media_type="text/csv; charset=shift_jis",
         headers={"Content-Disposition": f"attachment; filename*=UTF-8''{filename}"},
     )
