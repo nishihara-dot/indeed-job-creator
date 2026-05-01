@@ -1,4 +1,4 @@
-import anthropic
+import google.generativeai as genai
 import json
 import os
 import re
@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 SYSTEM_PROMPT = """あなたはIndeedの求人票作成の専門家です。企業情報と採用担当者からの依頼文をもとに、求職者にとって魅力的な求人票を作成してください。
 
@@ -21,28 +21,37 @@ SYSTEM_PROMPT = """あなたはIndeedの求人票作成の専門家です。企�
 7. 読みやすいよう適切に改行・箇条書きを使う
 
 【出力形式】
-必ず以下のJSON形式のみで出力してください（前後に説明文は不要）:
+必ず以下のJSON形式のみで出力してください（前後に説明文・コードブロック記号は不要）:
 {
     "company_name": "会社名",
     "job_title": "求人タイトル（具体的で魅力的なもの、30文字以内推奨）",
     "prefecture": "都道府県名（例：東京都）",
     "city": "市区町村名（例：渋谷区）",
     "employment_type": "雇用形態（正社員/契約社員/パート・アルバイト/派遣社員/業務委託 のいずれか）",
-    "salary_min": 最低給与の数値（月給なら円、時給なら円、年収なら万円単位の数値。不明な場合はnull）,
-    "salary_max": 最高給与の数値（月給なら円、時給なら円、年収なら万円単位の数値。不明な場合はnull）,
+    "salary_min": 最低給与の数値（月給なら円、時給なら円。不明な場合はnull）,
+    "salary_max": 最高給与の数値（月給なら円、時給なら円。不明な場合はnull）,
     "salary_type": "給与単位（月給/時給/年収 のいずれか）",
     "description": "仕事内容（詳細に、改行や箇条書きを活用して400文字以上）",
     "requirements": "応募資格・必須条件（箇条書きで具体的に）",
     "preferred_skills": "歓迎スキル・経験（箇条書き。なければ空文字）",
-    "working_hours": "勤務時間（例：9:00〜18:00（実働8時間）、フレックスタイム制など）",
-    "holidays": "休日・休暇（例：完全週休2日制（土日祝）、年間休日125日、有給休暇など）",
+    "working_hours": "勤務時間（例：9:00〜18:00（実働8時間））",
+    "holidays": "休日・休暇（例：完全週休2日制（土日祝）、年間休日125日など）",
     "benefits": "待遇・福利厚生（交通費・社会保険・各種手当など、箇条書き）",
     "selection_process": "選考プロセス（例：書類選考 → 一次面接 → 最終面接）",
     "appeal_points": ["アピールポイント1（短く印象的に）", "アピールポイント2", "アピールポイント3"]
 }"""
 
+_model = genai.GenerativeModel(
+    model_name="gemini-1.5-flash",
+    system_instruction=SYSTEM_PROMPT,
+    generation_config=genai.GenerationConfig(
+        max_output_tokens=4096,
+        temperature=0.7,
+    ),
+)
 
-async def generate_job_posting(
+
+def generate_job_posting(
     company_url: str,
     request_text: str,
     application_url: str = "",
@@ -51,7 +60,6 @@ async def generate_job_posting(
     contact_email: str = "",
 ) -> dict:
     company_info = scrape_company_info(company_url)
-
     scrape_status = "取得成功" if company_info["success"] else f"取得失敗（{company_info.get('error', '不明')}）"
 
     user_content = f"""## 企業サイトURL
@@ -66,7 +74,7 @@ async def generate_job_posting(
 ## 採用担当者からの依頼文
 {request_text}
 
-## 追加情報（入力がある場合のみ使用）
+## 追加情報
 応募先URL: {application_url or '未入力'}
 担当者名: {contact_name or '未入力'}
 担当者電話番号: {contact_phone or '未入力'}
@@ -75,20 +83,12 @@ async def generate_job_posting(
 上記の情報をもとに、求職者にとって最大限魅力的な求人票をJSON形式で作成してください。
 """
 
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        system=[
-            {
-                "type": "text",
-                "text": SYSTEM_PROMPT,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ],
-        messages=[{"role": "user", "content": user_content}],
-    )
+    response = _model.generate_content(user_content)
+    content = response.text
 
-    content = response.content[0].text
+    # コードブロック記号を除去
+    content = re.sub(r"```json\s*", "", content)
+    content = re.sub(r"```\s*", "", content)
 
     json_match = re.search(r"\{[\s\S]*\}", content)
     if not json_match:

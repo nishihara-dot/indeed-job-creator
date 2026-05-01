@@ -123,13 +123,13 @@ async def root():
 
 
 @app.post("/api/generate")
-async def generate(req: GenerateRequest):
+def generate(req: GenerateRequest):
     if not req.company_url.startswith("http"):
         raise HTTPException(status_code=400, detail="企業URLはhttp/httpsで始まる必要があります")
     if not req.request_text.strip():
         raise HTTPException(status_code=400, detail="依頼文を入力してください")
     try:
-        result = await generate_job_posting(
+        result = generate_job_posting(
             company_url=req.company_url,
             request_text=req.request_text,
             application_url=req.application_url,
