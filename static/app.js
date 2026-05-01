@@ -82,7 +82,7 @@ function fillPreview(data) {
     'job_title', 'company_name', 'prefecture', 'city',
     'employment_type', 'salary_type',
     'description', 'requirements', 'preferred_skills',
-    'working_hours', 'holidays', 'benefits', 'selection_process',
+    'working_hours', 'holidays', 'benefits', 'selection_process', 'contact_email',
   ];
   fields.forEach(f => {
     const el = document.getElementById('p_' + f);
@@ -90,6 +90,7 @@ function fillPreview(data) {
   });
   setVal('p_salary_min', data.salary_min || '');
   setVal('p_salary_max', data.salary_max || '');
+  setVal('p_hire_count', data.hire_count || '');
 
   // appeal points
   const tagsEl = document.getElementById('p_appeal_tags');
@@ -132,7 +133,6 @@ async function saveJob() {
     payload.application_url = payload.application_url || generatedData.application_url;
     payload.contact_name = payload.contact_name || generatedData.contact_name;
     payload.contact_phone = payload.contact_phone || generatedData.contact_phone;
-    payload.contact_email = payload.contact_email || generatedData.contact_email;
     payload.original_request = generatedData.original_request;
     payload.appeal_points = generatedData.appeal_points;
   }
@@ -168,6 +168,8 @@ function collectPreviewForm() {
     holidays: val('p_holidays'),
     benefits: val('p_benefits'),
     selection_process: val('p_selection_process'),
+    hire_count: intOrNull('p_hire_count'),
+    contact_email: val('p_contact_email'),
   };
 }
 
@@ -212,6 +214,7 @@ function renderJobs() {
       <td>${date}</td>
       <td>
         <button class="btn btn-outline btn-sm" onclick="openEdit(${j.id})">編集</button>
+        <button class="btn btn-secondary btn-sm" style="margin-left:4px" onclick="duplicateJob(${j.id})">複製</button>
         <button class="btn btn-danger btn-sm" style="margin-left:4px" onclick="deleteJob(${j.id})">削除</button>
       </td>
     </tr>`;
@@ -331,6 +334,53 @@ async function deleteSelected() {
 }
 
 // ──────────────────────────────────────────────
+// Duplicate
+// ──────────────────────────────────────────────
+async function duplicateJob(id) {
+  const job = jobs.find(j => j.id === id);
+  if (!job) return;
+
+  const payload = {
+    company_name: job.company_name,
+    company_url: job.company_url,
+    job_title: job.job_title + '（コピー）',
+    prefecture: job.prefecture,
+    city: job.city,
+    employment_type: job.employment_type,
+    salary_min: job.salary_min,
+    salary_max: job.salary_max,
+    salary_type: job.salary_type,
+    description: job.description,
+    requirements: job.requirements,
+    preferred_skills: job.preferred_skills,
+    working_hours: job.working_hours,
+    holidays: job.holidays,
+    benefits: job.benefits,
+    selection_process: job.selection_process,
+    hire_count: job.hire_count,
+    appeal_points: job.appeal_points,
+    application_url: job.application_url,
+    contact_name: job.contact_name,
+    contact_phone: job.contact_phone,
+    contact_email: job.contact_email,
+    original_request: job.original_request,
+  };
+
+  try {
+    const res = await fetch('/api/jobs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error((await res.json()).detail);
+    await loadJobs();
+    toast(`「${job.job_title}」を複製しました`, 'success');
+  } catch (e) {
+    toast('複製に失敗しました: ' + e.message, 'error');
+  }
+}
+
+// ──────────────────────────────────────────────
 // Edit modal
 // ──────────────────────────────────────────────
 function openEdit(id) {
@@ -342,11 +392,13 @@ function openEdit(id) {
     'job_title', 'company_name', 'prefecture', 'city',
     'employment_type', 'salary_type',
     'description', 'requirements', 'preferred_skills',
-    'working_hours', 'holidays', 'benefits', 'selection_process', 'application_url',
+    'working_hours', 'holidays', 'benefits', 'selection_process',
+    'contact_email', 'application_url',
   ];
   fields.forEach(f => setVal('m_' + f, job[f] || ''));
   setVal('m_salary_min', job.salary_min || '');
   setVal('m_salary_max', job.salary_max || '');
+  setVal('m_hire_count', job.hire_count || '');
 
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -373,6 +425,8 @@ async function saveEdit() {
     holidays: val('m_holidays'),
     benefits: val('m_benefits'),
     selection_process: val('m_selection_process'),
+    hire_count: intOrNull('m_hire_count'),
+    contact_email: val('m_contact_email'),
     application_url: val('m_application_url'),
   };
 

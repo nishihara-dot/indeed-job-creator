@@ -17,6 +17,16 @@ from ai_service import generate_job_posting
 
 models.Base.metadata.create_all(bind=engine)
 
+# 既存DBへの列追加マイグレーション
+from sqlalchemy import text as _text
+with engine.connect() as _conn:
+    for _col in ["hire_count INTEGER"]:
+        try:
+            _conn.execute(_text(f"ALTER TABLE job_postings ADD COLUMN {_col}"))
+            _conn.commit()
+        except Exception:
+            pass
+
 app = FastAPI(title="Indeed求人作る君", version="1.0.0")
 
 app.add_middleware(
@@ -63,6 +73,7 @@ class JobCreate(BaseModel):
     holidays: Optional[str] = None
     benefits: Optional[str] = None
     selection_process: Optional[str] = None
+    hire_count: Optional[int] = None
     appeal_points: Optional[str] = None
     application_url: Optional[str] = None
     contact_name: Optional[str] = None
@@ -102,6 +113,7 @@ def job_to_dict(job: JobPosting) -> dict:
         "holidays": job.holidays,
         "benefits": job.benefits,
         "selection_process": job.selection_process,
+        "hire_count": job.hire_count,
         "appeal_points": job.appeal_points,
         "application_url": job.application_url,
         "contact_name": job.contact_name,
@@ -245,7 +257,7 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
         location = "".join(filter(None, [job.prefecture or "", job.city or ""]))
 
         row = [
-            "公開",                          # ステータス
+            "募集中",                         # ステータス
             job.company_name or "",          # 会社名
             job.job_title or "",             # 職種名
             "",                              # 職業カテゴリー
@@ -281,8 +293,8 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
             job.selection_process or "",     # 募集要項（その他）
             "",                              # 掲載画像
             "", "", "",                      # タグ（3列）
-            "",                              # 採用予定人数
-            "",                              # 履歴書の有無
+            job.hire_count or "",            # 採用予定人数
+            "必須",                           # 履歴書の有無
             "", "", "",                      # 応募者に関する情報（3列）
             job.contact_email or "",         # 応募用メールアドレス
             job.contact_phone or "",         # 求人問い合わせ先電話番号

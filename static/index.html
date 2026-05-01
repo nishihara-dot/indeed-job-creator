@@ -161,6 +161,18 @@
               <label>待遇・福利厚生</label>
               <textarea id="p_benefits" rows="4"></textarea>
             </div>
+            <div class="form-group">
+              <label>募集要項（その他）</label>
+              <textarea id="p_selection_process" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label>採用予定人数</label>
+              <input type="number" id="p_hire_count" placeholder="例: 3">
+            </div>
+            <div class="form-group">
+              <label>応募用メールアドレス</label>
+              <input type="email" id="p_contact_email" placeholder="recruit@example.co.jp">
+            </div>
             <div class="btn-group">
               <button class="btn btn-success" onclick="saveJob()">💾 保存する</button>
               <button class="btn btn-secondary" onclick="clearPreview()">✕ クリア</button>
@@ -295,8 +307,16 @@
         <textarea id="m_benefits" rows="4"></textarea>
       </div>
       <div class="form-group">
-        <label>選考プロセス</label>
+        <label>募集要項（その他）</label>
         <input type="text" id="m_selection_process">
+      </div>
+      <div class="form-group">
+        <label>採用予定人数</label>
+        <input type="number" id="m_hire_count">
+      </div>
+      <div class="form-group">
+        <label>応募用メールアドレス</label>
+        <input type="email" id="m_contact_email">
       </div>
       <div class="form-group">
         <label>応募URL</label>
