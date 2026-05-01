@@ -236,8 +236,20 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="m_id">
-      <input type="hidden" id="m_company_url">
-      <input type="hidden" id="m_original_request">
+
+      <details class="regen-section">
+        <summary>🤖 AI再生成用の情報（クリックして展開）</summary>
+        <div class="regen-body">
+          <div class="form-group">
+            <label>企業URL</label>
+            <input type="url" id="m_company_url" placeholder="https://www.example.co.jp">
+          </div>
+          <div class="form-group">
+            <label>採用依頼文</label>
+            <textarea id="m_original_request" rows="5" placeholder="依頼メールの内容を入力してください"></textarea>
+          </div>
+        </div>
+      </details>
       <div class="form-group">
         <label>求人タイトル</label>
         <input type="text" id="m_job_title">

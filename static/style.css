@@ -426,6 +426,30 @@ tr.selected td { background: #eff6ff; }
   border-bottom: 1px solid var(--border);
 }
 
+/* ── Regenerate section in modal ── */
+.regen-section {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background: #f8fafc;
+}
+.regen-section summary {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--blue);
+  user-select: none;
+  list-style: none;
+}
+.regen-section summary::-webkit-details-marker { display: none; }
+.regen-section summary::before {
+  content: '▶ ';
+  font-size: 10px;
+}
+details[open].regen-section summary::before { content: '▼ '; }
+.regen-body { padding: 12px 14px 14px; }
+
 /* checkbox style */
 input[type="checkbox"] {
   width: 16px;

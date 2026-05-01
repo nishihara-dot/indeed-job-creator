@@ -387,8 +387,12 @@ async function regenerateInModal() {
   const companyUrl = val('m_company_url');
   const originalRequest = val('m_original_request');
 
-  if (!companyUrl || !originalRequest) {
-    toast('企業URLまたは依頼文が保存されていないため再生成できません', 'error');
+  if (!companyUrl) {
+    toast('「AI再生成用の情報」を展開して企業URLを入力してください', 'error');
+    return;
+  }
+  if (!originalRequest) {
+    toast('「AI再生成用の情報」を展開して採用依頼文を入力してください', 'error');
     return;
   }
 
