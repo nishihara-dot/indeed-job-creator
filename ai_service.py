@@ -1,5 +1,4 @@
-from google import genai
-from google.genai import types
+from groq import Groq
 import json
 import os
 import re
@@ -8,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 SYSTEM_PROMPT = """あなたはIndeedの求人票作成の専門家です。企業情報と採用担当者からの依頼文をもとに、求職者にとって魅力的な求人票を作成してください。
 
@@ -75,16 +74,16 @@ def generate_job_posting(
 上記の情報をもとに、求職者にとって最大限魅力的な求人票をJSON形式で作成してください。
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
-        contents=user_content,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            max_output_tokens=4096,
-            temperature=0.7,
-        ),
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_content},
+        ],
+        max_tokens=4096,
+        temperature=0.7,
     )
-    content = response.text
+    content = response.choices[0].message.content
 
     content = re.sub(r"```json\s*", "", content)
     content = re.sub(r"```\s*", "", content)
