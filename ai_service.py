@@ -1,4 +1,5 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import json
 import os
 import re
@@ -7,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 SYSTEM_PROMPT = """あなたはIndeedの求人票作成の専門家です。企業情報と採用担当者からの依頼文をもとに、求職者にとって魅力的な求人票を作成してください。
 
@@ -40,15 +41,6 @@ SYSTEM_PROMPT = """あなたはIndeedの求人票作成の専門家です。企�
     "selection_process": "選考プロセス（例：書類選考 → 一次面接 → 最終面接）",
     "appeal_points": ["アピールポイント1（短く印象的に）", "アピールポイント2", "アピールポイント3"]
 }"""
-
-_model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash-8b",
-    system_instruction=SYSTEM_PROMPT,
-    generation_config=genai.GenerationConfig(
-        max_output_tokens=4096,
-        temperature=0.7,
-    ),
-)
 
 
 def generate_job_posting(
@@ -83,10 +75,17 @@ def generate_job_posting(
 上記の情報をもとに、求職者にとって最大限魅力的な求人票をJSON形式で作成してください。
 """
 
-    response = _model.generate_content(user_content)
+    response = client.models.generate_content(
+        model="gemini-2.0-flash-lite",
+        contents=user_content,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            max_output_tokens=4096,
+            temperature=0.7,
+        ),
+    )
     content = response.text
 
-    # コードブロック記号を除去
     content = re.sub(r"```json\s*", "", content)
     content = re.sub(r"```\s*", "", content)
 
