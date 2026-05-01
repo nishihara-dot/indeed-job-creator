@@ -381,6 +381,60 @@ async function duplicateJob(id) {
 }
 
 // ──────────────────────────────────────────────
+// Regenerate in modal
+// ──────────────────────────────────────────────
+async function regenerateInModal() {
+  const companyUrl = val('m_company_url');
+  const originalRequest = val('m_original_request');
+
+  if (!companyUrl || !originalRequest) {
+    toast('企業URLまたは依頼文が保存されていないため再生成できません', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('regen-btn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        company_url: companyUrl,
+        request_text: originalRequest,
+        application_url: val('m_application_url'),
+        contact_name: '',
+        contact_phone: '',
+        contact_email: val('m_contact_email'),
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'エラーが発生しました');
+    }
+    const data = await res.json();
+
+    const fields = [
+      'job_title', 'company_name', 'prefecture', 'city',
+      'employment_type', 'salary_type',
+      'description', 'requirements', 'preferred_skills',
+      'working_hours', 'holidays', 'benefits', 'selection_process',
+    ];
+    fields.forEach(f => setVal('m_' + f, data[f] || ''));
+    setVal('m_salary_min', data.salary_min || '');
+    setVal('m_salary_max', data.salary_max || '');
+
+    toast('再生成しました。内容を確認して保存してください', 'success');
+  } catch (e) {
+    toast('再生成に失敗しました: ' + e.message, 'error');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+// ──────────────────────────────────────────────
 // Edit modal
 // ──────────────────────────────────────────────
 function openEdit(id) {
@@ -388,6 +442,8 @@ function openEdit(id) {
   if (!job) return;
 
   setVal('m_id', job.id);
+  setVal('m_company_url', job.company_url || '');
+  setVal('m_original_request', job.original_request || '');
   const fields = [
     'job_title', 'company_name', 'prefecture', 'city',
     'employment_type', 'salary_type',

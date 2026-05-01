@@ -236,6 +236,8 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="m_id">
+      <input type="hidden" id="m_company_url">
+      <input type="hidden" id="m_original_request">
       <div class="form-group">
         <label>求人タイトル</label>
         <input type="text" id="m_job_title">
@@ -325,6 +327,10 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" id="regen-btn" onclick="regenerateInModal()">
+        <div class="spinner"></div>
+        <span class="btn-label">🤖 AIで再生成</span>
+      </button>
       <button class="btn btn-success" onclick="saveEdit()">💾 保存する</button>
     </div>
   </div>
