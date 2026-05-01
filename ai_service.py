@@ -42,7 +42,7 @@ SYSTEM_PROMPT = """あなたはIndeedの求人票作成の専門家です。企�
 }"""
 
 _model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash",
+    model_name="gemini-2.0-flash",
     system_instruction=SYSTEM_PROMPT,
     generation_config=genai.GenerationConfig(
         max_output_tokens=4096,
