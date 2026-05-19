@@ -42,8 +42,18 @@ function onPersonaChange(sel) {
 function getTargetPersona() {
   const sel = document.getElementById('target_persona_preset');
   if (!sel) return '';
-  if (sel.value === 'custom') return val('target_persona_custom');
-  return sel.value;
+
+  const parts = [];
+  const preset = sel.value === 'custom' ? val('target_persona_custom') : sel.value;
+  if (preset) parts.push(preset);
+
+  const age = val('target_age');
+  if (age) parts.push(`想定年齢：${age}`);
+
+  const exp = val('target_experience');
+  if (exp) parts.push(`前職・経験：${exp}`);
+
+  return parts.join('／');
 }
 
 // ──────────────────────────────────────────────
