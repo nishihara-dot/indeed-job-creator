@@ -32,6 +32,21 @@ function toggleExtra(btn) {
 }
 
 // ──────────────────────────────────────────────
+// Persona preset toggle
+// ──────────────────────────────────────────────
+function onPersonaChange(sel) {
+  const custom = document.getElementById('target_persona_custom');
+  custom.style.display = sel.value === 'custom' ? 'block' : 'none';
+}
+
+function getTargetPersona() {
+  const sel = document.getElementById('target_persona_preset');
+  if (!sel) return '';
+  if (sel.value === 'custom') return val('target_persona_custom');
+  return sel.value;
+}
+
+// ──────────────────────────────────────────────
 // File upload → extract text
 // ──────────────────────────────────────────────
 async function handleFileUpload(input) {
@@ -90,6 +105,7 @@ async function generateJob() {
         contact_name: document.getElementById('contact_name').value.trim(),
         contact_phone: document.getElementById('contact_phone').value.trim(),
         contact_email: document.getElementById('contact_email').value.trim(),
+        target_persona: getTargetPersona(),
       }),
     });
     if (!res.ok) {

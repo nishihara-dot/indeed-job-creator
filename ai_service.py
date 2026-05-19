@@ -76,9 +76,21 @@ def generate_job_posting(
     contact_name: str = "",
     contact_phone: str = "",
     contact_email: str = "",
+    target_persona: str = "",
 ) -> dict:
     company_info = scrape_company_info(company_url)
     scrape_status = "取得成功" if company_info["success"] else f"取得失敗（{company_info.get('error', '不明')}）"
+
+    persona_section = f"""
+## ターゲット層（ペルソナ）
+{target_persona}
+
+このペルソナが「自分のための求人だ」と感じるよう、以下を意識してください：
+- タイトル・キャッチコピーにペルソナに刺さるキーワードを入れる
+- 仕事内容・アピールポイントの言葉遣いをペルソナに合わせる
+- 応募資格の必須条件をペルソナが満たしやすい書き方にする
+- ペルソナが重視する条件（時間・給与・環境など）を前面に出す
+""" if target_persona else ""
 
     user_content = f"""## 企業サイトURL
 {company_url}
@@ -91,7 +103,7 @@ def generate_job_posting(
 
 ## 採用担当者からの依頼文
 {request_text}
-
+{persona_section}
 ## 追加情報
 応募先URL: {application_url or '未入力'}
 担当者名: {contact_name or '未入力'}

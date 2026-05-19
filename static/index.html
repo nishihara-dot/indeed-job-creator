@@ -35,6 +35,24 @@
           </div>
 
           <div class="form-group">
+            <label>ターゲット層（ペルソナ） <span class="optional">任意</span></label>
+            <select id="target_persona_preset" onchange="onPersonaChange(this)">
+              <option value="">── 指定なし（AIにお任せ）</option>
+              <option value="経験者・即戦力（同業種3年以上）">経験者・即戦力（同業種3年以上）</option>
+              <option value="新卒・第二新卒（社会人1〜3年目）">新卒・第二新卒（社会人1〜3年目）</option>
+              <option value="主婦・主夫（ブランクあり歓迎、扶養内も可）">主婦・主夫（ブランクあり歓迎、扶養内も可）</option>
+              <option value="シニア・ミドル（40〜60代、豊富な経験を活かしたい方）">シニア・ミドル（40〜60代）</option>
+              <option value="学生・フリーター（アルバイト・未経験歓迎）">学生・フリーター（未経験歓迎）</option>
+              <option value="Uターン・Iターン希望者（地元で働きたい方）">Uターン・Iターン希望者</option>
+              <option value="副業・ダブルワーク希望者">副業・ダブルワーク希望者</option>
+              <option value="外国籍・多国籍人材（日本語N2以上）">外国籍・多国籍人材</option>
+              <option value="custom">カスタム（自由記述）</option>
+            </select>
+            <input type="text" id="target_persona_custom" placeholder="例：育児復帰中の30代女性、ITスキルあり"
+              style="display:none; margin-top:8px">
+          </div>
+
+          <div class="form-group">
             <label>採用依頼文（メール本文など） <span class="required">必須</span></label>
             <div class="file-upload-row">
               <label class="btn btn-secondary btn-sm file-upload-btn">

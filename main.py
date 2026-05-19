@@ -54,6 +54,7 @@ class GenerateRequest(BaseModel):
     contact_name: str = ""
     contact_phone: str = ""
     contact_email: str = ""
+    target_persona: str = ""
 
 
 class JobCreate(BaseModel):
@@ -203,6 +204,7 @@ def generate(req: GenerateRequest):
             contact_name=req.contact_name,
             contact_phone=req.contact_phone,
             contact_email=req.contact_email,
+            target_persona=req.target_persona,
         )
         return result
     except Exception as e:
