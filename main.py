@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, StreamingResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -126,6 +126,61 @@ def job_to_dict(job: JobPosting) -> dict:
 
 
 # ---------- routes ----------
+
+
+def _extract_text_from_file(filename: str, content: bytes) -> str:
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    if ext == "pdf":
+        from pypdf import PdfReader
+        reader = PdfReader(io.BytesIO(content))
+        return "\n".join(
+            page.extract_text() or "" for page in reader.pages
+        ).strip()
+
+    if ext == "docx":
+        from docx import Document
+        doc = Document(io.BytesIO(content))
+        return "\n".join(p.text for p in doc.paragraphs if p.text).strip()
+
+    if ext == "pptx":
+        from pptx import Presentation
+        prs = Presentation(io.BytesIO(content))
+        lines = []
+        for slide in prs.slides:
+            for shape in slide.shapes:
+                if shape.has_text_frame:
+                    for para in shape.text_frame.paragraphs:
+                        text = para.text.strip()
+                        if text:
+                            lines.append(text)
+        return "\n".join(lines)
+
+    if ext in ("txt", "csv", "md"):
+        for enc in ("utf-8", "shift_jis", "cp932", "euc_jp"):
+            try:
+                return content.decode(enc).strip()
+            except UnicodeDecodeError:
+                continue
+        return content.decode("utf-8", errors="replace").strip()
+
+    raise ValueError(f"非対応のファイル形式です: .{ext}")
+
+
+@app.post("/api/extract-text")
+async def extract_text(file: UploadFile = File(...)):
+    if file.size and file.size > 20 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="ファイルサイズは20MB以下にしてください")
+    content = await file.read()
+    try:
+        text = _extract_text_from_file(file.filename or "", content)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"テキスト抽出に失敗しました: {e}")
+    if not text:
+        raise HTTPException(status_code=400, detail="ファイルからテキストを抽出できませんでした")
+    return {"text": text, "filename": file.filename}
 
 
 @app.get("/", response_class=HTMLResponse)

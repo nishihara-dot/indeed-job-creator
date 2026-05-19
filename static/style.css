@@ -426,6 +426,27 @@ tr.selected td { background: #eff6ff; }
   border-bottom: 1px solid var(--border);
 }
 
+/* ── File upload row ── */
+.file-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.file-upload-btn { cursor: pointer; }
+.file-upload-hint {
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.file-upload-status {
+  font-size: 12px;
+  font-weight: 600;
+}
+.file-upload-status.loading { color: var(--blue); }
+.file-upload-status.success { color: var(--success); }
+.file-upload-status.error   { color: var(--danger); }
+
 /* ── Regenerate section in modal ── */
 .regen-section {
   border: 1px dashed var(--border);

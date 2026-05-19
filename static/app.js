@@ -32,6 +32,39 @@ function toggleExtra(btn) {
 }
 
 // ──────────────────────────────────────────────
+// File upload → extract text
+// ──────────────────────────────────────────────
+async function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const status = document.getElementById('file-upload-status');
+  status.textContent = '読み込み中...';
+  status.className = 'file-upload-status loading';
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const res = await fetch('/api/extract-text', { method: 'POST', body: form });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'エラーが発生しました');
+    }
+    const data = await res.json();
+    const ta = document.getElementById('request_text');
+    ta.value = ta.value ? ta.value + '\n\n' + data.text : data.text;
+    status.textContent = `✓ ${file.name} を読み込みました`;
+    status.className = 'file-upload-status success';
+  } catch (e) {
+    status.textContent = '✕ ' + e.message;
+    status.className = 'file-upload-status error';
+  }
+
+  input.value = '';
+}
+
+// ──────────────────────────────────────────────
 // Generate
 // ──────────────────────────────────────────────
 async function generateJob() {

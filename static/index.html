@@ -36,6 +36,14 @@
 
           <div class="form-group">
             <label>採用依頼文（メール本文など） <span class="required">必須</span></label>
+            <div class="file-upload-row">
+              <label class="btn btn-secondary btn-sm file-upload-btn">
+                📎 ファイルから読み込む
+                <input type="file" id="file-input" accept=".pdf,.docx,.pptx,.txt,.csv,.md" style="display:none" onchange="handleFileUpload(this)">
+              </label>
+              <span class="file-upload-hint">.pdf / .docx / .pptx / .txt / .csv</span>
+              <span id="file-upload-status" class="file-upload-status"></span>
+            </div>
             <textarea id="request_text" rows="8"
               placeholder="依頼メールの内容をそのまま貼り付けてください。&#10;&#10;例：&#10;お世話になります。&#10;この度、営業職の採用を検討しております。&#10;勤務地：東京都渋谷区&#10;給与：月給25〜35万円&#10;雇用形態：正社員&#10;..."></textarea>
           </div>
