@@ -32,28 +32,35 @@ function toggleExtra(btn) {
 }
 
 // ──────────────────────────────────────────────
-// Persona preset toggle
+// Persona (multi-select pills)
 // ──────────────────────────────────────────────
-function onPersonaChange(sel) {
-  const custom = document.getElementById('target_persona_custom');
-  custom.style.display = sel.value === 'custom' ? 'block' : 'none';
+function getCheckedValues(name) {
+  return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
+    .map(el => el.value);
 }
 
 function getTargetPersona() {
-  const sel = document.getElementById('target_persona_preset');
-  if (!sel) return '';
-
   const parts = [];
-  const preset = sel.value === 'custom' ? val('target_persona_custom') : sel.value;
-  if (preset) parts.push(preset);
 
-  const age = val('target_age');
-  if (age) parts.push(`想定年齢：${age}`);
+  const attr = getCheckedValues('persona_attr');
+  if (attr.length) parts.push('属性：' + attr.join('・'));
 
-  const exp = val('target_experience');
-  if (exp) parts.push(`前職・経験：${exp}`);
+  const age = getCheckedValues('persona_age');
+  if (age.length) parts.push('年齢層：' + age.join('・'));
 
-  return parts.join('／');
+  const exp = getCheckedValues('persona_exp');
+  if (exp.length) parts.push('前職・経験：' + exp.join('・'));
+
+  const priority = getCheckedValues('persona_priority');
+  if (priority.length) parts.push('優先事項：' + priority.join('・'));
+
+  const workstyle = getCheckedValues('persona_workstyle');
+  if (workstyle.length) parts.push('働き方：' + workstyle.join('・'));
+
+  const custom = val('target_persona_custom');
+  if (custom) parts.push('補足：' + custom);
+
+  return parts.join(' ／ ');
 }
 
 // ──────────────────────────────────────────────

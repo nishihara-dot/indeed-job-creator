@@ -35,48 +35,79 @@
           </div>
 
           <div class="form-group">
-            <label>ターゲット層（ペルソナ） <span class="optional">任意</span></label>
-            <select id="target_persona_preset" onchange="onPersonaChange(this)">
-              <option value="">── 指定なし（AIにお任せ）</option>
-              <option value="経験者・即戦力（同業種3年以上）">経験者・即戦力（同業種3年以上）</option>
-              <option value="新卒・第二新卒（社会人1〜3年目）">新卒・第二新卒（社会人1〜3年目）</option>
-              <option value="主婦・主夫（ブランクあり歓迎、扶養内も可）">主婦・主夫（ブランクあり歓迎、扶養内も可）</option>
-              <option value="シニア・ミドル（40〜60代、豊富な経験を活かしたい方）">シニア・ミドル（40〜60代）</option>
-              <option value="学生・フリーター（アルバイト・未経験歓迎）">学生・フリーター（未経験歓迎）</option>
-              <option value="Uターン・Iターン希望者（地元で働きたい方）">Uターン・Iターン希望者</option>
-              <option value="副業・ダブルワーク希望者">副業・ダブルワーク希望者</option>
-              <option value="外国籍・多国籍人材（日本語N2以上）">外国籍・多国籍人材</option>
-              <option value="custom">カスタム（自由記述）</option>
-            </select>
-            <input type="text" id="target_persona_custom" placeholder="例：育児復帰中の30代女性、ITスキルあり"
-              style="display:none; margin-top:8px">
-          </div>
+            <label>ターゲット層・ペルソナ設定 <span class="optional">任意・複数選択可</span></label>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>想定年齢層 <span class="optional">任意</span></label>
-              <select id="target_age">
-                <option value="">指定なし</option>
-                <option value="18〜25歳">18〜25歳</option>
-                <option value="26〜35歳">26〜35歳</option>
-                <option value="36〜45歳">36〜45歳</option>
-                <option value="46〜55歳">46〜55歳</option>
-                <option value="56歳以上">56歳以上</option>
-                <option value="年齢不問">年齢不問</option>
-              </select>
+            <div class="persona-block">
+              <div class="persona-block-label">属性・状況</div>
+              <div class="persona-pills">
+                <label class="pill"><input type="checkbox" name="persona_attr" value="経験者・即戦力"><span>経験者・即戦力</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="新卒・第二新卒"><span>新卒・第二新卒</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="主婦・主夫（ブランクOK）"><span>主婦・主夫</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="シニア・ミドル（40〜60代）"><span>シニア・ミドル</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="学生・フリーター"><span>学生・フリーター</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="Uターン・Iターン希望者"><span>Uターン・Iターン</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="副業・ダブルワーク希望者"><span>副業・ダブルワーク</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="外国籍・多国籍人材"><span>外国籍・多国籍</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="子育て中・育児と両立希望"><span>子育て中</span></label>
+                <label class="pill"><input type="checkbox" name="persona_attr" value="介護中・介護と両立希望"><span>介護中</span></label>
+              </div>
             </div>
-            <div class="form-group">
-              <label>前職・経験 <span class="optional">任意</span></label>
-              <select id="target_experience">
-                <option value="">指定なし</option>
-                <option value="同業種・同職種の経験者">同業種・同職種の経験者</option>
-                <option value="異業種からの転職者">異業種からの転職者</option>
-                <option value="未経験・業界未経験者">未経験・業界未経験者</option>
-                <option value="新卒・第二新卒">新卒・第二新卒</option>
-                <option value="フリーランス・個人事業主経験者">フリーランス経験者</option>
-                <option value="管理職・マネジメント経験者">管理職・マネジメント経験者</option>
-                <option value="公務員・非営利経験者">公務員・非営利経験者</option>
-              </select>
+
+            <div class="persona-block">
+              <div class="persona-block-label">想定年齢層</div>
+              <div class="persona-pills">
+                <label class="pill"><input type="checkbox" name="persona_age" value="18〜25歳"><span>18〜25歳</span></label>
+                <label class="pill"><input type="checkbox" name="persona_age" value="26〜35歳"><span>26〜35歳</span></label>
+                <label class="pill"><input type="checkbox" name="persona_age" value="36〜45歳"><span>36〜45歳</span></label>
+                <label class="pill"><input type="checkbox" name="persona_age" value="46〜55歳"><span>46〜55歳</span></label>
+                <label class="pill"><input type="checkbox" name="persona_age" value="56歳以上"><span>56歳以上</span></label>
+                <label class="pill"><input type="checkbox" name="persona_age" value="年齢不問"><span>年齢不問</span></label>
+              </div>
+            </div>
+
+            <div class="persona-block">
+              <div class="persona-block-label">前職・経験</div>
+              <div class="persona-pills">
+                <label class="pill"><input type="checkbox" name="persona_exp" value="同業種・同職種の経験者"><span>同業種経験者</span></label>
+                <label class="pill"><input type="checkbox" name="persona_exp" value="異業種からの転職者"><span>異業種転職</span></label>
+                <label class="pill"><input type="checkbox" name="persona_exp" value="未経験・業界未経験者"><span>未経験</span></label>
+                <label class="pill"><input type="checkbox" name="persona_exp" value="フリーランス・個人事業主経験者"><span>フリーランス経験</span></label>
+                <label class="pill"><input type="checkbox" name="persona_exp" value="管理職・マネジメント経験者"><span>管理職経験</span></label>
+                <label class="pill"><input type="checkbox" name="persona_exp" value="公務員・非営利出身者"><span>公務員・非営利</span></label>
+                <label class="pill"><input type="checkbox" name="persona_exp" value="スタートアップ・ベンチャー経験者"><span>スタートアップ経験</span></label>
+              </div>
+            </div>
+
+            <div class="persona-block">
+              <div class="persona-block-label">求職者の優先事項</div>
+              <div class="persona-pills">
+                <label class="pill"><input type="checkbox" name="persona_priority" value="給与・収入アップを重視"><span>給与アップ重視</span></label>
+                <label class="pill"><input type="checkbox" name="persona_priority" value="安定・長期就業を重視"><span>安定・長期重視</span></label>
+                <label class="pill"><input type="checkbox" name="persona_priority" value="成長・キャリアアップを重視"><span>キャリアアップ重視</span></label>
+                <label class="pill"><input type="checkbox" name="persona_priority" value="残業少・定時退社を重視"><span>残業少・定時退社</span></label>
+                <label class="pill"><input type="checkbox" name="persona_priority" value="在宅・リモートワークを重視"><span>リモート重視</span></label>
+                <label class="pill"><input type="checkbox" name="persona_priority" value="職場環境・人間関係を重視"><span>職場環境重視</span></label>
+                <label class="pill"><input type="checkbox" name="persona_priority" value="やりがい・社会貢献を重視"><span>やりがい重視</span></label>
+                <label class="pill"><input type="checkbox" name="persona_priority" value="資格・スキルアップ支援を重視"><span>スキルアップ支援</span></label>
+              </div>
+            </div>
+
+            <div class="persona-block">
+              <div class="persona-block-label">働き方の希望</div>
+              <div class="persona-pills">
+                <label class="pill"><input type="checkbox" name="persona_workstyle" value="フルタイム勤務希望"><span>フルタイム</span></label>
+                <label class="pill"><input type="checkbox" name="persona_workstyle" value="時短・パート勤務希望"><span>時短・パート</span></label>
+                <label class="pill"><input type="checkbox" name="persona_workstyle" value="週3〜4日勤務希望"><span>週3〜4日</span></label>
+                <label class="pill"><input type="checkbox" name="persona_workstyle" value="シフト制・曜日固定希望"><span>シフト・曜日固定</span></label>
+                <label class="pill"><input type="checkbox" name="persona_workstyle" value="在宅メイン希望"><span>在宅メイン</span></label>
+                <label class="pill"><input type="checkbox" name="persona_workstyle" value="出社メイン希望"><span>出社メイン</span></label>
+                <label class="pill"><input type="checkbox" name="persona_workstyle" value="ハイブリッド勤務希望"><span>ハイブリッド</span></label>
+              </div>
+            </div>
+
+            <div class="persona-block">
+              <div class="persona-block-label">カスタム補足</div>
+              <input type="text" id="target_persona_custom" placeholder="例：TOEIC800点以上保持者、運転免許必須の地方在住者など">
             </div>
           </div>
 

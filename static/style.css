@@ -426,6 +426,42 @@ tr.selected td { background: #eff6ff; }
   border-bottom: 1px solid var(--border);
 }
 
+/* ── Persona pill selector ── */
+.persona-block { margin-bottom: 14px; }
+.persona-block-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 7px;
+}
+.persona-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { display: inline-block; }
+.pill input[type="checkbox"] {
+  display: none;
+  width: auto;
+  height: auto;
+}
+.pill span {
+  display: inline-block;
+  padding: 5px 13px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #fff;
+  color: var(--text);
+  user-select: none;
+}
+.pill span:hover { border-color: var(--blue-light); color: var(--blue-light); }
+.pill input:checked + span {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
 /* ── File upload row ── */
 .file-upload-row {
   display: flex;
