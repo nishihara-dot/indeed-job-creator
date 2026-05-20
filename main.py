@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 from database import get_db, engine
 import models
-from models import JobPosting
+from models import JobPosting, Setting
 from ai_service import generate_job_posting
 
 models.Base.metadata.create_all(bind=engine)
@@ -189,6 +189,24 @@ async def extract_text(file: UploadFile = File(...)):
     if not text:
         raise HTTPException(status_code=400, detail="ファイルからテキストを抽出できませんでした")
     return {"text": text, "filename": file.filename}
+
+
+@app.get("/api/settings")
+def get_settings(db: Session = Depends(get_db)):
+    rows = db.query(Setting).all()
+    return {r.key: r.value for r in rows}
+
+
+@app.put("/api/settings")
+def update_settings(data: dict, db: Session = Depends(get_db)):
+    for key, value in data.items():
+        row = db.query(Setting).filter(Setting.key == key).first()
+        if row:
+            row.value = value
+        else:
+            db.add(Setting(key=key, value=value))
+    db.commit()
+    return {"ok": True}
 
 
 @app.get("/", response_class=HTMLResponse)

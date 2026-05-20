@@ -3,6 +3,12 @@ from datetime import datetime, timezone
 from database import Base
 
 
+class Setting(Base):
+    __tablename__ = "settings"
+    key = Column(String(100), primary_key=True)
+    value = Column(Text, nullable=True)
+
+
 class JobPosting(Base):
     __tablename__ = "job_postings"
 

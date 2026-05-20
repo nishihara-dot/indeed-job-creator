@@ -17,6 +17,7 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="create">✏️ 求人作成</button>
   <button class="tab-btn" data-tab="list">📂 保存済み求人</button>
+  <button class="tab-btn" data-tab="settings">⚙️ 設定</button>
 </div>
 
 <main>
@@ -203,22 +204,6 @@
               </select>
             </div>
 
-            <div id="p_haken_section" style="display:none">
-              <div class="section-label" style="margin-top:16px">派遣元情報</div>
-              <div class="form-group">
-                <label>派遣元会社名</label>
-                <input type="text" id="p_haken_company_name" placeholder="〇〇株式会社">
-              </div>
-              <div class="form-group">
-                <label>派遣元住所</label>
-                <input type="text" id="p_haken_address" placeholder="東京都渋谷区〇〇1-2-3">
-              </div>
-              <div class="form-group">
-                <label>募集要項（その他）に追加する文章</label>
-                <textarea id="p_haken_notes" rows="3" class="auto-resize" placeholder="例：許可番号：派XX-XXXXXX&#10;紹介予定派遣：なし"></textarea>
-              </div>
-            </div>
-
             <div class="section-label" style="margin-top:16px">給与</div>
             <div class="salary-row">
               <div class="form-group">
@@ -332,6 +317,25 @@
       </div>
     </div>
   </div>
+  <!-- ===== TAB: 設定 ===== -->
+  <div class="tab-panel" id="tab-settings">
+    <div class="card" style="max-width:600px">
+      <div class="card-title">🏢 派遣元情報の設定</div>
+      <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px">
+        雇用形態が「派遣社員」のとき、会社名と募集要項（その他）に自動で反映されます。
+      </p>
+      <div class="form-group">
+        <label>派遣元会社名</label>
+        <input type="text" id="s_haken_company_name" placeholder="〇〇株式会社">
+      </div>
+      <div class="form-group">
+        <label>募集要項（その他）の定型文</label>
+        <textarea id="s_haken_notes" rows="5" class="auto-resize"
+          placeholder="例：&#10;派遣元事業者名：〇〇株式会社&#10;許可番号：派XX-XXXXXX&#10;紹介予定派遣：なし"></textarea>
+      </div>
+      <button class="btn btn-success" onclick="saveSettings()">💾 設定を保存する</button>
+    </div>
+  </div>
 </main>
 
 <!-- ===== Edit Modal ===== -->
@@ -430,21 +434,6 @@
       <div class="form-group">
         <label>募集要項（その他）</label>
         <textarea id="m_selection_process" rows="3" class="auto-resize"></textarea>
-      </div>
-      <div id="m_haken_section" style="display:none">
-        <div class="section-label" style="margin-top:4px">派遣元情報</div>
-        <div class="form-group">
-          <label>派遣元会社名</label>
-          <input type="text" id="m_haken_company_name" placeholder="〇〇株式会社">
-        </div>
-        <div class="form-group">
-          <label>派遣元住所</label>
-          <input type="text" id="m_haken_address" placeholder="東京都渋谷区〇〇1-2-3">
-        </div>
-        <div class="form-group">
-          <label>募集要項（その他）に追加する文章</label>
-          <textarea id="m_haken_notes" rows="3" class="auto-resize" placeholder="例：許可番号：派XX-XXXXXX"></textarea>
-        </div>
       </div>
       <div class="form-group">
         <label>採用予定人数</label>

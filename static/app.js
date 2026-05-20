@@ -32,13 +32,49 @@ function toggleExtra(btn) {
 }
 
 // ──────────────────────────────────────────────
-// 派遣元セクション表示切替
+// 設定（派遣元情報）
+// ──────────────────────────────────────────────
+let hakenSettings = {};
+
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    hakenSettings = await res.json();
+    setVal('s_haken_company_name', hakenSettings.haken_company_name || '');
+    setVal('s_haken_notes', hakenSettings.haken_notes || '');
+  } catch (e) {}
+}
+
+async function saveSettings() {
+  try {
+    await fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        haken_company_name: val('s_haken_company_name'),
+        haken_notes: val('s_haken_notes'),
+      }),
+    });
+    hakenSettings.haken_company_name = val('s_haken_company_name');
+    hakenSettings.haken_notes = val('s_haken_notes');
+    toast('設定を保存しました', 'success');
+  } catch (e) {
+    toast('保存に失敗しました', 'error');
+  }
+}
+
+// ──────────────────────────────────────────────
+// 派遣社員選択時に派遣元情報を自動反映
 // ──────────────────────────────────────────────
 function toggleHakenSection(prefix) {
   const sel = document.getElementById(prefix + '_employment_type');
-  const sec = document.getElementById(prefix + '_haken_section');
-  if (!sel || !sec) return;
-  sec.style.display = sel.value === '派遣社員' ? 'block' : 'none';
+  if (!sel || sel.value !== '派遣社員') return;
+  if (hakenSettings.haken_company_name) {
+    setVal(prefix + '_company_name', hakenSettings.haken_company_name);
+  }
+  if (hakenSettings.haken_notes) {
+    setVal(prefix + '_selection_process', hakenSettings.haken_notes);
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -168,9 +204,6 @@ function fillPreview(data) {
   setVal('p_salary_min', data.salary_min || '');
   setVal('p_salary_max', data.salary_max || '');
   setVal('p_hire_count', data.hire_count || '');
-  setVal('p_haken_company_name', data.haken_company_name || '');
-  setVal('p_haken_address', data.haken_address || '');
-  setVal('p_haken_notes', data.haken_notes || '');
   toggleHakenSection('p');
 
   // appeal points
@@ -251,9 +284,6 @@ function collectPreviewForm() {
     selection_process: val('p_selection_process'),
     hire_count: intOrNull('p_hire_count'),
     contact_email: val('p_contact_email'),
-    haken_company_name: val('p_haken_company_name'),
-    haken_address: val('p_haken_address'),
-    haken_notes: val('p_haken_notes'),
   };
 }
 
@@ -543,9 +573,6 @@ function openEdit(id) {
   setVal('m_salary_min', job.salary_min || '');
   setVal('m_salary_max', job.salary_max || '');
   setVal('m_hire_count', job.hire_count || '');
-  setVal('m_haken_company_name', job.haken_company_name || '');
-  setVal('m_haken_address', job.haken_address || '');
-  setVal('m_haken_notes', job.haken_notes || '');
   toggleHakenSection('m');
 
   document.getElementById('edit-modal').classList.add('open');
@@ -576,9 +603,6 @@ async function saveEdit() {
     hire_count: intOrNull('m_hire_count'),
     contact_email: val('m_contact_email'),
     application_url: val('m_application_url'),
-    haken_company_name: val('m_haken_company_name'),
-    haken_address: val('m_haken_address'),
-    haken_notes: val('m_haken_notes'),
   };
 
   try {
@@ -661,3 +685,4 @@ document.querySelectorAll('.auto-resize').forEach(el => {
 // Init
 // ──────────────────────────────────────────────
 loadJobs();
+loadSettings();
