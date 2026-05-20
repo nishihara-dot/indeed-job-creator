@@ -374,7 +374,7 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
             "",                              # 勤務地（丁目・番地・号）
             "",                              # 勤務地（建物名・階数）
             job.employment_type or "",       # 雇用形態
-            "",                              # 有料職業紹介に該当
+            "いいえ",                         # 有料職業紹介に該当
             job.salary_type or "",           # 給与形態
             job.salary_min or "",            # 給与（最低額）
             job.salary_max or "",            # 給与（最高額）
@@ -403,7 +403,7 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
             job.hire_count or "",            # 採用予定人数
             "必須",                           # 履歴書の有無
             "", "", "",                      # 応募者に関する情報（3列）
-            job.contact_email or "",         # 応募用メールアドレス
+            job.contact_email or "nishihara@toyopla.jp",  # 応募用メールアドレス
             job.contact_phone or "",         # 求人問い合わせ先電話番号
             "", "", "",                      # 審査用の質問・自動アプローチ設定
             "",                              # ユーザー指定ID
