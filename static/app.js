@@ -602,7 +602,9 @@ function val(id) {
 }
 function setVal(id, v) {
   const el = document.getElementById(id);
-  if (el) el.value = v ?? '';
+  if (!el) return;
+  el.value = v ?? '';
+  if (el.classList.contains('auto-resize')) autoResize(el);
 }
 function intOrNull(id) {
   const v = val(id);
@@ -618,6 +620,18 @@ function esc(s) {
 function dateStr() {
   return new Date().toISOString().slice(0, 10).replace(/-/g, '');
 }
+
+// ──────────────────────────────────────────────
+// Auto-resize textarea
+// ──────────────────────────────────────────────
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+document.querySelectorAll('.auto-resize').forEach(el => {
+  el.addEventListener('input', () => autoResize(el));
+});
 
 // ──────────────────────────────────────────────
 // Init
