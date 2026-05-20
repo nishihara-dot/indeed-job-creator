@@ -72,6 +72,7 @@ SYSTEM_PROMPT = """あなたはIndeed Japan専門の求人票コピーライタ�
 def generate_job_posting(
     company_url: str,
     request_text: str,
+    recruitment_url: str = "",
     application_url: str = "",
     contact_name: str = "",
     contact_phone: str = "",
@@ -80,6 +81,23 @@ def generate_job_posting(
 ) -> dict:
     company_info = scrape_company_info(company_url)
     scrape_status = "取得成功" if company_info["success"] else f"取得失敗（{company_info.get('error', '不明')}）"
+
+    recruitment_section = ""
+    if recruitment_url and recruitment_url.startswith("http"):
+        rec_info = scrape_company_info(recruitment_url)
+        rec_status = "取得成功" if rec_info["success"] else f"取得失敗（{rec_info.get('error', '不明')}）"
+        recruitment_section = f"""
+## 採用ページURL
+{recruitment_url}
+
+## 採用ページ情報（スクレイピング結果: {rec_status}）
+【ページタイトル】{rec_info.get('title', 'N/A')}
+【概要・説明】{rec_info.get('meta_description', 'N/A')}
+【採用ページコンテンツ】
+{rec_info.get('content', '取得できませんでした') or '取得できませんでした'}
+
+※採用ページに記載の給与・勤務地・仕事内容・応募資格などの具体的な数値や条件を優先して使用してください。
+"""
 
     persona_section = f"""
 ## ターゲット層（ペルソナ）
@@ -100,7 +118,7 @@ def generate_job_posting(
 【概要・説明】{company_info.get('meta_description', 'N/A')}
 【サイトコンテンツ】
 {company_info.get('content', '取得できませんでした') or '取得できませんでした'}
-
+{recruitment_section}
 ## 採用担当者からの依頼文
 {request_text}
 {persona_section}

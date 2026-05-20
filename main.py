@@ -50,6 +50,7 @@ if _os.getenv("SERVE_STATIC", "true").lower() != "false":
 class GenerateRequest(BaseModel):
     company_url: str
     request_text: str
+    recruitment_url: str = ""
     application_url: str = ""
     contact_name: str = ""
     contact_phone: str = ""
@@ -200,6 +201,7 @@ def generate(req: GenerateRequest):
         result = generate_job_posting(
             company_url=req.company_url,
             request_text=req.request_text,
+            recruitment_url=req.recruitment_url,
             application_url=req.application_url,
             contact_name=req.contact_name,
             contact_phone=req.contact_phone,

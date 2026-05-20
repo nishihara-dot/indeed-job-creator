@@ -118,6 +118,7 @@ async function generateJob() {
       body: JSON.stringify({
         company_url: url,
         request_text: text,
+        recruitment_url: document.getElementById('recruitment_url').value.trim(),
         application_url: document.getElementById('application_url').value.trim(),
         contact_name: document.getElementById('contact_name').value.trim(),
         contact_phone: document.getElementById('contact_phone').value.trim(),

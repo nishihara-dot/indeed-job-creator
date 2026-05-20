@@ -426,6 +426,13 @@ tr.selected td { background: #eff6ff; }
   border-bottom: 1px solid var(--border);
 }
 
+/* ── Field hint ── */
+.field-hint {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 5px;
+}
+
 /* ── Persona pill selector ── */
 .persona-block { margin-bottom: 14px; }
 .persona-block-label {
