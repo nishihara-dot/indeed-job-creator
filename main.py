@@ -410,12 +410,12 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
         ]
         writer.writerow(row)
 
-    # Indeed Japan テンプレートはShift-JIS
-    csv_bytes = output.getvalue().encode("shift_jis", errors="replace")
+    # UTF-8 with BOM（Excel・Indeed Japan どちらでも正しく読める）
+    csv_bytes = b'\xef\xbb\xbf' + output.getvalue().encode("utf-8")
     filename = f"indeed_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
 
     return Response(
         content=csv_bytes,
-        media_type="text/csv; charset=shift_jis",
+        media_type="text/csv; charset=utf-8",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
