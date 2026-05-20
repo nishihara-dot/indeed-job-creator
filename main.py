@@ -318,7 +318,7 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
     output = io.StringIO()
     writer = csv.writer(output)
 
-    # Indeed Japan 公式フォーマット（70列）
+    # Indeed Japan 公式フォーマット（69列・テンプレート完全準拠）
     headers = [
         "ステータス", "会社名", "職種名", "職業カテゴリー", "求人キャッチコピー",
         "勤務地（郵便番号）", "勤務地（都道府県・市区町村・町域）", "勤務地（丁目・番地・号）", "勤務地（建物名・階数）",
@@ -341,7 +341,7 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
         "採用予定人数", "履歴書の有無",
         "応募者に関する情報", "応募者に関する情報", "応募者に関する情報",
         "応募用メールアドレス", "求人問い合わせ先電話番号（半角）",
-        "審査用の質問", "自動アプローチ利用設定", "自動アプローチ条件設定", "ユーザー指定ID",
+        "審査用の質問", "自動アプローチ利用設定", "ユーザー指定ID",
     ]
     writer.writerow(headers)
 
@@ -413,7 +413,7 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
             "", "", "",                      # 応募者に関する情報（3列）
             job.contact_email or "nishihara@toyopla.jp",  # 応募用メールアドレス
             job.contact_phone or "",         # 求人問い合わせ先電話番号
-            "", "", "",                      # 審査用の質問・自動アプローチ設定
+            "", "",                          # 審査用の質問・自動アプローチ利用設定
             "",                              # ユーザー指定ID
         ]
         writer.writerow(row)
