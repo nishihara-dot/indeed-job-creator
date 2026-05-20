@@ -371,11 +371,28 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
         if sal_min and sal_max and sal_min > sal_max:
             sal_min, sal_max = sal_max, sal_min
 
+        # 旧形式の職業カテゴリーを有効値にマッピング
+        _CAT_MAP = {
+            "クリエイティブ": "その他クリエイティブ/デザイン職",
+            "事務・管理": "一般事務",
+            "IT・機械・電気・電子": "その他IT",
+            "建設・土木・設備・設計": "その他建築/土木/プラント専門職",
+            "医療・介護・福祉": "医療/福祉専門職その他",
+            "飲食・フード": "その他飲食",
+            "製造・工場・物流・倉庫": "その他機械/電気/電子製品専門職",
+            "保育・教育": "その他教育/保育専門職",
+            "農林水産": "その他公務員/団体職員/農林水産",
+            "販売・サービス": "その他販売/フロアスタッフ",
+            "企画・マーケティング・経営・管理職": "その他企画/マーケティング",
+        }
+        job_category_csv = job.job_category or ""
+        job_category_csv = _CAT_MAP.get(job_category_csv, job_category_csv)
+
         row = [
             "募集中",                              # ステータス
             job.company_name or "",               # 会社名
             job.job_title or "",                  # 職種名
-            job.job_category or "",               # 職業カテゴリー
+            job_category_csv,                     # 職業カテゴリー
             catchcopy,                            # 求人キャッチコピー
             "",                                   # 勤務地（郵便番号）
             location,                             # 勤務地（都道府県・市区町村・町域）
