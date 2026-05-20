@@ -29,6 +29,9 @@ class JobPosting(Base):
     contact_phone = Column(String(50), nullable=True)
     contact_email = Column(String(200), nullable=True)
     hire_count = Column(Integer, nullable=True)
+    haken_company_name = Column(String(200), nullable=True)
+    haken_address = Column(String(500), nullable=True)
+    haken_notes = Column(Text, nullable=True)
     original_request = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(

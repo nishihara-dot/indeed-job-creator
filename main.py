@@ -20,7 +20,7 @@ models.Base.metadata.create_all(bind=engine)
 # 既存DBへの列追加マイグレーション
 from sqlalchemy import text as _text
 with engine.connect() as _conn:
-    for _col in ["hire_count INTEGER"]:
+    for _col in ["hire_count INTEGER", "haken_company_name VARCHAR(200)", "haken_address VARCHAR(500)", "haken_notes TEXT"]:
         try:
             _conn.execute(_text(f"ALTER TABLE job_postings ADD COLUMN {_col}"))
             _conn.commit()
@@ -76,6 +76,9 @@ class JobCreate(BaseModel):
     benefits: Optional[str] = None
     selection_process: Optional[str] = None
     hire_count: Optional[int] = None
+    haken_company_name: Optional[str] = None
+    haken_address: Optional[str] = None
+    haken_notes: Optional[str] = None
     appeal_points: Optional[str] = None
     application_url: Optional[str] = None
     contact_name: Optional[str] = None
@@ -116,6 +119,9 @@ def job_to_dict(job: JobPosting) -> dict:
         "benefits": job.benefits,
         "selection_process": job.selection_process,
         "hire_count": job.hire_count,
+        "haken_company_name": job.haken_company_name,
+        "haken_address": job.haken_address,
+        "haken_notes": job.haken_notes,
         "appeal_points": job.appeal_points,
         "application_url": job.application_url,
         "contact_name": job.contact_name,
@@ -259,6 +265,23 @@ def delete_job(job_id: int, db: Session = Depends(get_db)):
     return {"message": "削除しました"}
 
 
+def _build_other(job) -> str:
+    parts = []
+    if job.selection_process:
+        parts.append(job.selection_process)
+    if job.employment_type == "派遣社員":
+        haken_lines = []
+        if job.haken_company_name:
+            haken_lines.append(f"派遣元事業者名：{job.haken_company_name}")
+        if job.haken_address:
+            haken_lines.append(f"派遣元住所：{job.haken_address}")
+        if job.haken_notes:
+            haken_lines.append(job.haken_notes)
+        if haken_lines:
+            parts.append("\n".join(haken_lines))
+    return "\n\n".join(parts)
+
+
 @app.post("/api/export")
 def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
     jobs = db.query(JobPosting).filter(JobPosting.id.in_(req.job_ids)).all()
@@ -349,7 +372,7 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
             "",                              # 募集要項（アクセス）
             "",                              # 募集要項（給与の補足）
             job.benefits or "",              # 募集要項（待遇・福利厚生）
-            job.selection_process or "",     # 募集要項（その他）
+            _build_other(job),               # 募集要項（その他）
             "",                              # 掲載画像
             "", "", "",                      # タグ（3列）
             job.hire_count or "",            # 採用予定人数

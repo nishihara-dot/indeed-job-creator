@@ -194,13 +194,29 @@
             </div>
             <div class="form-group">
               <label>雇用形態</label>
-              <select id="p_employment_type">
+              <select id="p_employment_type" onchange="toggleHakenSection('p')">
                 <option>正社員</option>
                 <option>契約社員</option>
                 <option>パート・アルバイト</option>
                 <option>派遣社員</option>
                 <option>業務委託</option>
               </select>
+            </div>
+
+            <div id="p_haken_section" style="display:none">
+              <div class="section-label" style="margin-top:16px">派遣元情報</div>
+              <div class="form-group">
+                <label>派遣元会社名</label>
+                <input type="text" id="p_haken_company_name" placeholder="〇〇株式会社">
+              </div>
+              <div class="form-group">
+                <label>派遣元住所</label>
+                <input type="text" id="p_haken_address" placeholder="東京都渋谷区〇〇1-2-3">
+              </div>
+              <div class="form-group">
+                <label>募集要項（その他）に追加する文章</label>
+                <textarea id="p_haken_notes" rows="3" class="auto-resize" placeholder="例：許可番号：派XX-XXXXXX&#10;紹介予定派遣：なし"></textarea>
+              </div>
             </div>
 
             <div class="section-label" style="margin-top:16px">給与</div>
@@ -361,7 +377,7 @@
       </div>
       <div class="form-group">
         <label>雇用形態</label>
-        <select id="m_employment_type">
+        <select id="m_employment_type" onchange="toggleHakenSection('m')">
           <option>正社員</option>
           <option>契約社員</option>
           <option>パート・アルバイト</option>
@@ -414,6 +430,21 @@
       <div class="form-group">
         <label>募集要項（その他）</label>
         <textarea id="m_selection_process" rows="3" class="auto-resize"></textarea>
+      </div>
+      <div id="m_haken_section" style="display:none">
+        <div class="section-label" style="margin-top:4px">派遣元情報</div>
+        <div class="form-group">
+          <label>派遣元会社名</label>
+          <input type="text" id="m_haken_company_name" placeholder="〇〇株式会社">
+        </div>
+        <div class="form-group">
+          <label>派遣元住所</label>
+          <input type="text" id="m_haken_address" placeholder="東京都渋谷区〇〇1-2-3">
+        </div>
+        <div class="form-group">
+          <label>募集要項（その他）に追加する文章</label>
+          <textarea id="m_haken_notes" rows="3" class="auto-resize" placeholder="例：許可番号：派XX-XXXXXX"></textarea>
+        </div>
       </div>
       <div class="form-group">
         <label>採用予定人数</label>

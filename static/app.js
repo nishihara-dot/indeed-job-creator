@@ -32,6 +32,16 @@ function toggleExtra(btn) {
 }
 
 // ──────────────────────────────────────────────
+// 派遣元セクション表示切替
+// ──────────────────────────────────────────────
+function toggleHakenSection(prefix) {
+  const sel = document.getElementById(prefix + '_employment_type');
+  const sec = document.getElementById(prefix + '_haken_section');
+  if (!sel || !sec) return;
+  sec.style.display = sel.value === '派遣社員' ? 'block' : 'none';
+}
+
+// ──────────────────────────────────────────────
 // Persona (multi-select pills)
 // ──────────────────────────────────────────────
 function getCheckedValues(name) {
@@ -158,6 +168,10 @@ function fillPreview(data) {
   setVal('p_salary_min', data.salary_min || '');
   setVal('p_salary_max', data.salary_max || '');
   setVal('p_hire_count', data.hire_count || '');
+  setVal('p_haken_company_name', data.haken_company_name || '');
+  setVal('p_haken_address', data.haken_address || '');
+  setVal('p_haken_notes', data.haken_notes || '');
+  toggleHakenSection('p');
 
   // appeal points
   const tagsEl = document.getElementById('p_appeal_tags');
@@ -237,6 +251,9 @@ function collectPreviewForm() {
     selection_process: val('p_selection_process'),
     hire_count: intOrNull('p_hire_count'),
     contact_email: val('p_contact_email'),
+    haken_company_name: val('p_haken_company_name'),
+    haken_address: val('p_haken_address'),
+    haken_notes: val('p_haken_notes'),
   };
 }
 
@@ -526,6 +543,10 @@ function openEdit(id) {
   setVal('m_salary_min', job.salary_min || '');
   setVal('m_salary_max', job.salary_max || '');
   setVal('m_hire_count', job.hire_count || '');
+  setVal('m_haken_company_name', job.haken_company_name || '');
+  setVal('m_haken_address', job.haken_address || '');
+  setVal('m_haken_notes', job.haken_notes || '');
+  toggleHakenSection('m');
 
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -555,6 +576,9 @@ async function saveEdit() {
     hire_count: intOrNull('m_hire_count'),
     contact_email: val('m_contact_email'),
     application_url: val('m_application_url'),
+    haken_company_name: val('m_haken_company_name'),
+    haken_address: val('m_haken_address'),
+    haken_notes: val('m_haken_notes'),
   };
 
   try {
