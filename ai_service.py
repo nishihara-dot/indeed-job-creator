@@ -297,6 +297,10 @@ NG例：スクレイピングで取得した実際の社名・グループ名・
 
     result = json.loads(json_match.group())
 
+    # ユーザーが雇用形態を指定した場合はAIの判断より優先する
+    if employment_type:
+        result["employment_type"] = employment_type
+
     # 派遣求人：後処理で派遣先社名を除去（AIが指示に従わなかった場合の保険）
     if employment_type == "派遣社員":
         _scrub_client_name(result, company_info, haken_company_name)
