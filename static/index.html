@@ -42,6 +42,21 @@
           </div>
 
           <div class="form-group">
+            <label>雇用形態 <span class="optional">任意</span></label>
+            <select id="employment_type_gen" onchange="onGenEmploymentTypeChange()">
+              <option value="">（AIに判断させる）</option>
+              <option value="正社員">正社員</option>
+              <option value="契約社員">契約社員</option>
+              <option value="パート・アルバイト">パート・アルバイト</option>
+              <option value="派遣社員">派遣社員</option>
+              <option value="業務委託">業務委託</option>
+            </select>
+            <div id="haken-gen-note" class="field-hint haken-note" style="display:none">
+              ⚠️ 派遣社員を選択しました。派遣先企業名は「大手メーカー」「東証プライム上場企業」のような表現で匿名化して生成されます。会社名欄には設定済みの派遣元会社名が自動で入ります。
+            </div>
+          </div>
+
+          <div class="form-group">
             <label>ターゲット層・ペルソナ設定 <span class="optional">任意・複数選択可</span></label>
 
             <div class="persona-block">

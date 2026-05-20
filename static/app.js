@@ -78,6 +78,15 @@ function toggleHakenSection(prefix) {
 }
 
 // ──────────────────────────────────────────────
+// 生成フォーム：雇用形態変更
+// ──────────────────────────────────────────────
+function onGenEmploymentTypeChange() {
+  const sel = document.getElementById('employment_type_gen');
+  const note = document.getElementById('haken-gen-note');
+  note.style.display = sel.value === '派遣社員' ? '' : 'none';
+}
+
+// ──────────────────────────────────────────────
 // Persona (multi-select pills)
 // ──────────────────────────────────────────────
 function getCheckedValues(name) {
@@ -170,6 +179,7 @@ async function generateJob() {
         contact_phone: document.getElementById('contact_phone').value.trim(),
         contact_email: document.getElementById('contact_email').value.trim(),
         target_persona: getTargetPersona(),
+        employment_type: document.getElementById('employment_type_gen').value,
       }),
     });
     if (!res.ok) {

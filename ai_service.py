@@ -120,6 +120,8 @@ def generate_job_posting(
     contact_phone: str = "",
     contact_email: str = "",
     target_persona: str = "",
+    employment_type: str = "",
+    haken_company_name: str = "",
 ) -> dict:
     company_info = scrape_company_info(company_url)
     scrape_status = "取得成功" if company_info["success"] else f"取得失敗（{company_info.get('error', '不明')}）"
@@ -152,6 +154,28 @@ def generate_job_posting(
 - ペルソナが重視する条件（時間・給与・環境など）を前面に出す
 """ if target_persona else ""
 
+    if employment_type == "派遣社員":
+        haken_name_instruction = f'company_name には派遣元会社名「{haken_company_name}」を使用してください。' if haken_company_name else "company_name には派遣元（登録先）会社名を使用してください。"
+        haken_section = f"""
+## 【派遣求人・重要指示】
+この求人は「派遣社員」の求人です。就業先（派遣先）企業の社名は求人に掲載できません。以下を厳守してください。
+
+■ 企業名の扱い
+- {haken_name_instruction}
+- job_title・description・requirements・benefits など全てのフィールドで派遣先の具体的な社名を使わないこと
+
+■ 派遣先の表現方法（業種・規模感・特徴で表現する）
+良い例：「大手自動車メーカー」「東証プライム上場の食品メーカー」「都内の有名ホテル」「年商1,000億超の商社」「全国展開の大手小売チェーン」
+NG例：「〇〇株式会社」「△△工業」など実名
+
+■ description の書き方
+- 冒頭で「大手〇〇企業での就業チャンス！」のように企業規模・業種の魅力を打ち出す
+- 派遣先の職場環境・仕事内容は具体的に書いてよい（社名だけ伏せる）
+- 「安定した大手企業で長期就業できる」「ネームバリューある職場でスキルアップ」などの訴求を入れる
+"""
+    else:
+        haken_section = f"\n## 雇用形態\n{employment_type}\n" if employment_type else ""
+
     user_content = f"""## 企業サイトURL
 {company_url}
 
@@ -160,7 +184,7 @@ def generate_job_posting(
 【概要・説明】{company_info.get('meta_description', 'N/A')}
 【サイトコンテンツ】
 {company_info.get('content', '取得できませんでした') or '取得できませんでした'}
-{recruitment_section}
+{recruitment_section}{haken_section}
 ## 採用担当者からの依頼文
 {request_text}
 {persona_section}

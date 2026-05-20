@@ -432,6 +432,14 @@ tr.selected td { background: #eff6ff; }
   color: var(--text-sub);
   margin-top: 5px;
 }
+.field-hint.haken-note {
+  color: #b7630a;
+  background: #fff8ec;
+  border: 1px solid #f5c97a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  line-height: 1.6;
+}
 
 /* ── Persona pill selector ── */
 .persona-block { margin-bottom: 14px; }

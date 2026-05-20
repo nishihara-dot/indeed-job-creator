@@ -56,6 +56,7 @@ class GenerateRequest(BaseModel):
     contact_phone: str = ""
     contact_email: str = ""
     target_persona: str = ""
+    employment_type: str = ""
 
 
 class JobCreate(BaseModel):
@@ -216,12 +217,16 @@ async def root():
 
 
 @app.post("/api/generate")
-def generate(req: GenerateRequest):
+def generate(req: GenerateRequest, db: Session = Depends(get_db)):
     if not req.company_url.startswith("http"):
         raise HTTPException(status_code=400, detail="企業URLはhttp/httpsで始まる必要があります")
     if not req.request_text.strip():
         raise HTTPException(status_code=400, detail="依頼文を入力してください")
     try:
+        haken_name = ""
+        if req.employment_type == "派遣社員":
+            haken_row = db.query(Setting).filter(Setting.key == "haken_company_name").first()
+            haken_name = haken_row.value if haken_row else ""
         result = generate_job_posting(
             company_url=req.company_url,
             request_text=req.request_text,
@@ -231,6 +236,8 @@ def generate(req: GenerateRequest):
             contact_phone=req.contact_phone,
             contact_email=req.contact_email,
             target_persona=req.target_persona,
+            employment_type=req.employment_type,
+            haken_company_name=haken_name,
         )
         return result
     except Exception as e:
