@@ -110,6 +110,72 @@ SYSTEM_PROMPT = """あなたはIndeed Japanで年間10万件以上の求人票�
     "appeal_points": ["アピールポイント1（短く印象的に）", "アピールポイント2", "アピールポイント3"]
 }"""
 
+# 会社名候補をサイトタイトル・メタから抽出するパターン
+_CORP_SUFFIXES = re.compile(
+    r'(株式会社|有限会社|合同会社|社団法人|財団法人|グループ|ホールディングス|HD|Holdings|Group|Co\.,?\s*Ltd\.?|Corporation|Corp\.?|Inc\.?)'
+)
+
+
+def _extract_company_names(company_info: dict) -> list[str]:
+    """スクレイピング結果から社名候補を抽出する。"""
+    candidates = set()
+    for key in ('title', 'meta_description'):
+        text = company_info.get(key, '') or ''
+        # 法人格・グループ名の前後を含む単語を抽出
+        for m in _CORP_SUFFIXES.finditer(text):
+            start = max(0, m.start() - 20)
+            end = min(len(text), m.end() + 10)
+            chunk = text[start:end].strip()
+            # 句読点・記号で区切って短いフラグメントを候補にする
+            for part in re.split(r'[\s｜|/・\-「」【】（）()　]', chunk):
+                part = part.strip()
+                if len(part) >= 3:
+                    candidates.add(part)
+    return list(candidates)
+
+
+def _scrub_client_name(result: dict, company_info: dict, haken_company_name: str) -> None:
+    """生成結果から派遣先社名を除去し、業種表現に置き換える（保険処理）。"""
+    names = _extract_company_names(company_info)
+    if not names:
+        return
+
+    text_fields = ['job_title', 'description', 'requirements', 'preferred_skills',
+                   'working_hours', 'holidays', 'benefits', 'selection_process']
+    replacement = '就業先企業'
+
+    for field in text_fields:
+        val = result.get(field)
+        if not isinstance(val, str):
+            continue
+        for name in names:
+            if name and name in val:
+                val = val.replace(name, replacement)
+        result[field] = val
+
+    # appeal_points はリスト or JSON文字列
+    ap = result.get('appeal_points')
+    if isinstance(ap, list):
+        result['appeal_points'] = [
+            _replace_names(item, names, replacement) for item in ap
+        ]
+    elif isinstance(ap, str):
+        for name in names:
+            if name:
+                ap = ap.replace(name, replacement)
+        result['appeal_points'] = ap
+
+    # company_name は派遣元名で上書き
+    if haken_company_name:
+        result['company_name'] = haken_company_name
+
+
+def _replace_names(text: str, names: list[str], replacement: str) -> str:
+    for name in names:
+        if name:
+            text = text.replace(name, replacement)
+    return text
+
 
 def generate_job_posting(
     company_url: str,
@@ -155,23 +221,32 @@ def generate_job_posting(
 """ if target_persona else ""
 
     if employment_type == "派遣社員":
-        haken_name_instruction = f'company_name には派遣元会社名「{haken_company_name}」を使用してください。' if haken_company_name else "company_name には派遣元（登録先）会社名を使用してください。"
+        haken_name_instruction = f'company_name には必ず派遣元会社名「{haken_company_name}」を使用してください。' if haken_company_name else "company_name には派遣元（登録先）会社名を使用してください。"
+        site_title = company_info.get('title', '')
+        avoid_hint = f'特に「{site_title}」に含まれる企業名・グループ名・ブランド名は一切使用禁止です。' if site_title else ''
         haken_section = f"""
-## 【派遣求人・重要指示】
-この求人は「派遣社員」の求人です。就業先（派遣先）企業の社名は求人に掲載できません。以下を厳守してください。
+## 【派遣求人・絶対厳守ルール】
+この求人は「派遣社員」の求人です。就業先（派遣先）企業の名称は求人票に一切掲載できません。
 
-■ 企業名の扱い
-- {haken_name_instruction}
-- job_title・description・requirements・benefits など全てのフィールドで派遣先の具体的な社名を使わないこと
+━━ 禁止事項（違反したら求人票として使えません） ━━
+・job_title、description、requirements、preferred_skills、working_hours、holidays、benefits、selection_process、appeal_points — 全フィールドに派遣先の社名・グループ名・略称・ブランド名を書かないこと
+・{avoid_hint}
+・「当社」「弊社」という表現も、文脈上派遣先を指す場合は使用禁止
 
-■ 派遣先の表現方法（業種・規模感・特徴で表現する）
-良い例：「大手自動車メーカー」「東証プライム上場の食品メーカー」「都内の有名ホテル」「年商1,000億超の商社」「全国展開の大手小売チェーン」
-NG例：「〇〇株式会社」「△△工業」など実名
+━━ 代わりに使う表現（業種＋規模感で表現する） ━━
+良い例：「大手自動車メーカー」「東証プライム上場の食品メーカー」「都内の有名ホテル」「年商1,000億超の商社」「全国展開の大手小売チェーン」「業界トップクラスのIT企業」
+NG例：スクレイピングで取得した実際の社名・グループ名・ブランド名をそのまま使う
 
-■ description の書き方
-- 冒頭で「大手〇〇企業での就業チャンス！」のように企業規模・業種の魅力を打ち出す
-- 派遣先の職場環境・仕事内容は具体的に書いてよい（社名だけ伏せる）
-- 「安定した大手企業で長期就業できる」「ネームバリューある職場でスキルアップ」などの訴求を入れる
+━━ company_name フィールドの扱い ━━
+{haken_name_instruction}
+
+━━ description の書き方 ━━
+・冒頭で「大手〇〇企業での就業チャンス！」のように業種・規模を強調する
+・職場環境・業務内容・魅力は具体的に書いてよい（社名だけ伏せる）
+・「安定した大手企業でじっくり長期就業できます」「ネームバリューある職場でスキルを磨けます」などの訴求を入れる
+
+━━ 出力前の最終チェック ━━
+出力するJSON全体を見直し、派遣先の社名・グループ名が含まれていたら必ず業種表現に置き換えてから出力すること。
 """
     else:
         haken_section = f"\n## 雇用形態\n{employment_type}\n" if employment_type else ""
@@ -221,6 +296,10 @@ NG例：「〇〇株式会社」「△△工業」など実名
         raise ValueError(f"AIからの応答でJSONが見つかりませんでした。応答: {content[:200]}")
 
     result = json.loads(json_match.group())
+
+    # 派遣求人：後処理で派遣先社名を除去（AIが指示に従わなかった場合の保険）
+    if employment_type == "派遣社員":
+        _scrub_client_name(result, company_info, haken_company_name)
 
     result["company_url"] = company_url
     result["application_url"] = application_url
