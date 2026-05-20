@@ -1,4 +1,4 @@
-from groq import Groq
+from anthropic import Anthropic
 import json
 import os
 import re
@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 SYSTEM_PROMPT = """あなたはIndeed Japanで年間10万件以上の求人票を手がけてきたトップクラスの求人コピーライターです。クリック率・応募率を最大化する求人票を作成してください。
 
@@ -179,16 +179,15 @@ def generate_job_posting(
 「〇〇募集」「〇〇スタッフ」だけの凡庸なタイトルは絶対に避けてください。
 """
 
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+    response = client.messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=4096,
+        system=SYSTEM_PROMPT,
         messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_content},
         ],
-        max_tokens=4096,
-        temperature=0.85,
     )
-    content = response.choices[0].message.content
+    content = response.content[0].text
 
     content = re.sub(r"```json\s*", "", content)
     content = re.sub(r"```\s*", "", content)
