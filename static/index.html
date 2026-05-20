@@ -223,19 +223,131 @@
                 <label>職業カテゴリー <span class="required">必須</span></label>
                 <select id="p_job_category">
                   <option value="">（選択してください）</option>
-                  <option>営業</option>
-                  <option>販売・サービス</option>
-                  <option>事務・管理</option>
-                  <option>企画・マーケティング・経営・管理職</option>
-                  <option>IT・機械・電気・電子</option>
-                  <option>建設・土木・設備・設計</option>
-                  <option>医療・介護・福祉</option>
-                  <option>飲食・フード</option>
-                  <option>製造・工場・物流・倉庫</option>
-                  <option>保育・教育</option>
-                  <option>農林水産</option>
-                  <option>クリエイティブ</option>
-                  <option>その他</option>
+                  <optgroup label="営業">
+                    <option>建築法人営業</option><option>建築個人営業</option><option>土木法人営業</option><option>不動産法人営業</option><option>不動産個人営業</option>
+                    <option>IT/通信製品法人営業</option><option>Webサービス法人営業</option><option>人材/アウトソーシング法人営業</option>
+                    <option>銀行法人営業</option><option>証券法人営業</option><option>保険法人営業</option><option>銀行個人営業</option><option>証券個人営業</option><option>保険個人営業</option><option>その他金融/保険営業</option>
+                    <option>広告/メディア法人営業</option><option>食品/飲料/香料法人営業</option><option>医薬情報担当者/MR</option><option>医療機器法人営業</option><option>その他営業</option>
+                  </optgroup>
+                  <optgroup label="企画/マーケティング/カスタマーサポート">
+                    <option>経営企画</option><option>事業企画</option><option>新規事業企画/開発</option><option>営業企画</option><option>商品企画</option>
+                    <option>マーケティング戦略企画</option><option>広告運用</option><option>CRM/MA</option><option>Webサイト運営</option><option>ECサイト運営</option>
+                    <option>コーポレートブランディング</option><option>カスタマーサクセスマネージャー</option>
+                    <option>アウトバウンドコールスタッフ</option><option>インバウンドコールスタッフ</option><option>コールセンター管理/運営</option><option>その他カスタマーサポート/コールセンター</option><option>その他企画/マーケティング</option>
+                  </optgroup>
+                  <optgroup label="コーポレートスタッフ">
+                    <option>管理会計</option><option>財務会計</option><option>税務</option><option>財務/ファイナンス</option>
+                    <option>人事企画/制度設計</option><option>採用人事</option><option>社員教育/研修人事</option><option>福利厚生/労務/給与管理人事</option><option>その他人事</option>
+                    <option>総務</option><option>法務</option><option>知的財産</option><option>特許</option><option>コンプライアンス</option>
+                    <option>情報システム</option><option>情報セキュリティ</option><option>広報/PR</option><option>IR</option><option>内部監査</option><option>リスク管理</option><option>その他コーポレートスタッフ</option>
+                  </optgroup>
+                  <optgroup label="SCM/生産管理/購買/物流">
+                    <option>生産管理</option><option>生産計画策定</option><option>需要予測</option><option>原材料購買</option><option>部品購買</option><option>その他購買/調達</option>
+                    <option>物流企画/管理</option><option>倉庫管理</option><option>輸配送</option><option>貿易</option><option>その他SCM/生産管理/購買/物流</option>
+                  </optgroup>
+                  <optgroup label="事務/受付/秘書/翻訳">
+                    <option>一般事務</option><option>営業事務</option><option>経理/財務事務</option><option>人事事務</option><option>総務事務</option>
+                    <option>購買/物流事務</option><option>貿易事務/国際事務/英文事務</option><option>法務事務</option><option>特許事務</option><option>工場現場事務</option><option>その他事務</option>
+                    <option>受付</option><option>秘書</option><option>通訳</option><option>翻訳</option>
+                  </optgroup>
+                  <optgroup label="小売販売/流通">
+                    <option>コンビニ販売/フロアスタッフ</option><option>家電販売/フロアスタッフ</option><option>携帯ショップ販売/フロアスタッフ</option>
+                    <option>薬局/ドラッグストア販売/フロアスタッフ</option><option>化粧品販売/フロアスタッフ</option>
+                    <option>販売/フロアスタッフ（スーパー/ホームセンター）</option><option>販売/フロアスタッフ（アパレル/アクセサリー/インテリア）</option><option>その他販売/フロアスタッフ</option>
+                    <option>薬局/ドラッグストア店長/支配人</option><option>その他店長/支配人</option><option>MD</option><option>仕入/バイヤー</option><option>その他小売/流通専門職</option>
+                  </optgroup>
+                  <optgroup label="サービス/接客">
+                    <option>警備スタッフ/守衛</option><option>清掃スタッフ</option><option>ハウスクリーニングスタッフ</option><option>家事代行スタッフ/家政婦</option><option>ベビーシッター</option>
+                    <option>イベント企画</option><option>イベント運営スタッフ</option><option>添乗員/ガイド/ツアコン</option><option>旅行手配員</option>
+                    <option>フロント</option><option>ハウスキーピング</option><option>宿泊/ホテル責任者</option><option>その他宿泊/ホテルスタッフ</option>
+                    <option>理容師</option><option>美容師</option><option>ネイリスト</option><option>エステティシャン</option><option>整体師</option><option>柔道整復師</option><option>セラピスト</option><option>美容部員</option><option>その他美容/リラクゼーションスタッフ</option>
+                    <option>ウエディングプランナー</option><option>葬祭ディレクター/プランナー</option><option>マンション/ビル管理人</option>
+                    <option>トレーナー/インストラクター</option><option>ガソリンスタンドスタッフ</option><option>デリバリー</option><option>その他サービス業</option>
+                  </optgroup>
+                  <optgroup label="飲食">
+                    <option>飲食ホール/フロアスタッフ</option><option>飲食調理スタッフ</option><option>飲食店長/支配人</option><option>飲食エリアマネージャー</option>
+                    <option>和食シェフ/料理人</option><option>イタリアンシェフ/料理人</option><option>フレンチシェフ/料理人</option><option>その他シェフ/料理人</option>
+                    <option>パティシエ/菓子職人</option><option>ソムリエ/バーテンダー</option><option>バリスタ</option><option>パン職人</option><option>調理師</option><option>その他飲食</option>
+                  </optgroup>
+                  <optgroup label="コンサル/士業">
+                    <option>戦略/経営コンサルタント</option><option>営業コンサルタント</option><option>マーケティングコンサルタント</option><option>財務/会計/税務コンサルタント</option>
+                    <option>システムコンサルタント</option><option>SAP/ERP導入コンサルタント</option><option>セキュリティコンサルタント</option><option>その他IT/システムコンサルタント</option>
+                    <option>会計士</option><option>税理士</option><option>弁護士</option><option>パラリーガル</option><option>弁理士/特許技術者</option>
+                    <option>司法書士</option><option>行政書士</option><option>社会保険労務士</option><option>社会保険労務士補助</option><option>中小企業診断士</option>
+                    <option>市場調査</option><option>マーケティングリサーチャー</option><option>リサーチ/分析アナリスト</option><option>その他コンサル/士業/リサーチャー</option>
+                  </optgroup>
+                  <optgroup label="IT">
+                    <option>汎用機SE</option><option>web/オープンSE</option><option>組み込み制御SE</option>
+                    <option>汎用機プログラマー</option><option>web/オープンプログラマー</option><option>組み込み制御プログラマー</option>
+                    <option>web/オープンプロジェクトマネージャー</option><option>web/オープンプロジェクトリーダー</option><option>ディレクター</option><option>PMO</option><option>プロダクトマネージャー</option>
+                    <option>フロントエンドエンジニア</option><option>サーバーサイドエンジニア</option><option>データベースエンジニア</option><option>ネットワークエンジニア</option>
+                    <option>セキュリティエンジニア</option><option>データエンジニア</option><option>DevOpsエンジニア</option><option>アーキテクト</option>
+                    <option>SRE（Site Reliability Engineer）</option><option>QA/テストエンジニア</option><option>保守/運用/サポートエンジニア</option>
+                    <option>社内システムエンジニア</option><option>セールスエンジニア/プリセールス</option><option>データサイエンティスト</option><option>データアナリスト</option>
+                    <option>エンジニアリングマネージャー/VP</option><option>その他IT</option>
+                  </optgroup>
+                  <optgroup label="クリエイティブ/デザイン職">
+                    <option>Webプロデューサー</option><option>Webディレクター</option><option>Webデザイナー</option><option>UI/UXデザイナー</option><option>その他Webサービス/制作</option>
+                    <option>クリエイティブディレクター</option><option>アートディレクター</option><option>グラフィックデザイナー</option><option>イラストレーター</option><option>コピーライター</option><option>その他広告/グラフィック</option>
+                    <option>ゲームプロデューサー</option><option>ゲームプランナー</option><option>ゲームプログラマー</option><option>その他ゲーム</option>
+                    <option>ファッションデザイナー</option><option>パタンナー</option><option>スタイリスト</option><option>その他アパレル/ファッション</option>
+                    <option>プロダクトデザイナー/インダストリアルデザイナー</option><option>インテリアコーディネーター</option><option>インテリアデザイナー</option>
+                    <option>ライター/編集</option><option>フォトグラファー</option><option>マークアップ/コーダー</option><option>その他クリエイティブ/デザイン職</option>
+                  </optgroup>
+                  <optgroup label="建築/土木/プラント専門職">
+                    <option>建築意匠設計</option><option>建築構造設計</option><option>建築内装設計/インテリア</option><option>建築電気設備設計</option><option>建築空調設備設計</option>
+                    <option>土木建設コンサルタント</option><option>土木構造設計</option><option>プラントプロセス設計</option><option>プラント配管設計</option>
+                    <option>建築施工管理</option><option>土木施工管理</option><option>プラント施工管理</option><option>管工事施工管理</option><option>電気施工管理</option><option>空調設備施工管理</option>
+                    <option>建築製図/CADオペレーター</option><option>土木製図/CADオペレーター</option><option>建築BIM/CIMエンジニア</option>
+                    <option>職人/現場作業員</option><option>安全管理/環境保全</option><option>建築積算</option><option>土木積算</option>
+                    <option>建築アフターサービス/フィールドエンジニア</option><option>その他建築/土木/プラント専門職</option>
+                  </optgroup>
+                  <optgroup label="不動産専門職">
+                    <option>不動産事業開発</option><option>不動産用地仕入</option><option>不動産プロパティマネージャー</option><option>不動産ファシリティマネージャー</option>
+                    <option>不動産マンション管理員</option><option>不動産ビルメンテナンス/管理員</option><option>宅建事務</option><option>不動産投資アセットマネジメント</option><option>その他不動産専門職</option>
+                  </optgroup>
+                  <optgroup label="機械/電気/電子製品専門職">
+                    <option>機械研究開発</option><option>電気/電子研究開発</option><option>半導体研究開発</option><option>組込/制御研究開発</option>
+                    <option>機構設計</option><option>回路設計</option><option>電気/電子デバイス設計</option><option>半導体デバイス設計</option><option>CAE解析</option>
+                    <option>製図/CADオペレーター（機械/電気/電子製品専門職）</option><option>評価/実験/テスト（機械/電気/電子製品専門職）</option>
+                    <option>機械生産技術</option><option>電気/電子生産技術</option><option>工程改善/IE</option>
+                    <option>機械品質保証</option><option>電気/電子品質保証</option><option>機械品質管理</option><option>電気/電子品質管理</option>
+                    <option>機械技術営業</option><option>電気/電子技術営業</option><option>設備保全/メンテナンス</option>
+                    <option>組込/制御設計/開発（PLC/ラダー/シーケンス制御）</option><option>組込/制御設計/開発（アプリケーション）</option>
+                    <option>機械製造オペレーター/ラインマネージャー</option><option>電気/電子製造オペレーター/ラインマネージャー</option><option>その他機械/電気/電子製品専門職</option>
+                  </optgroup>
+                  <optgroup label="医療/福祉専門職">
+                    <option>医師</option><option>看護師</option><option>准看護師</option><option>助産師</option><option>保健師</option><option>看護助手</option>
+                    <option>臨床工学技士</option><option>歯科医師</option><option>歯科衛生士</option><option>歯科技工士</option><option>歯科助手</option>
+                    <option>理学療法士</option><option>作業療法士</option><option>言語聴覚士</option><option>視能訓練士</option><option>鍼灸師</option>
+                    <option>栄養士</option><option>管理栄養士</option><option>臨床検査技師</option><option>診療放射線技師</option><option>医療事務</option><option>医療秘書</option>
+                    <option>薬剤師</option><option>管理薬剤師</option><option>登録販売者</option><option>調剤補助員</option><option>調剤事務員</option>
+                    <option>ケアマネージャー</option><option>介護福祉士</option><option>ケアワーカー</option><option>ホームヘルパー</option>
+                    <option>生活相談員/生活支援員</option><option>福祉/介護事務</option><option>学童保育指導員</option><option>医療/福祉専門職その他</option>
+                  </optgroup>
+                  <optgroup label="金融専門職">
+                    <option>金融ディーラー</option><option>トレーダー</option><option>ファンドマネジャー</option><option>アクチュアリー</option>
+                    <option>融資/契約審査法人担当</option><option>融資/契約審査個人担当</option><option>債権回収法人担当</option>
+                    <option>生保事務</option><option>損保事務</option><option>FP/ファイナンシャルアドバイザー</option><option>その他金融専門職</option>
+                  </optgroup>
+                  <optgroup label="交通/運輸/物流専門職">
+                    <option>タクシードライバー/ハイヤードライバー</option><option>バス運転手</option><option>配送/宅配/セールスドライバー</option>
+                    <option>運送ドライバー（中長距離）</option><option>その他ドライバー/乗務員</option><option>運行管理</option>
+                    <option>倉庫作業スタッフ</option><option>倉庫/配送フォークリフトドライバー</option><option>物流フォワーダー</option><option>その他交通/運輸/物流専門職</option>
+                  </optgroup>
+                  <optgroup label="人材サービス専門職">
+                    <option>キャリアアドバイザー</option><option>リクルーティングアドバイザー</option><option>ヘッドハンター</option>
+                    <option>技術系派遣コーディネーター</option><option>事務系/非技術系派遣コーディネーター</option><option>BPO管理/運営</option><option>その他人材サービス専門職</option>
+                  </optgroup>
+                  <optgroup label="教育/保育専門職">
+                    <option>保育士</option><option>幼稚園教諭</option><option>その他保育</option>
+                    <option>学習塾講師</option><option>英語講師/トレーナー</option><option>日本語講師/トレーナー</option><option>その他講師/トレーナー</option>
+                    <option>家庭教師</option><option>小学校教員</option><option>中学校教員</option><option>高校教員</option><option>心理カウンセラー</option><option>その他教育/保育専門職</option>
+                  </optgroup>
+                  <optgroup label="その他">
+                    <option>CEO/社長/代表取締役/代表理事</option><option>財務責任者/CFO/Chief Financial Officer</option><option>技術責任者/CTO/Chief Technology Officer</option><option>その他エグゼクティブ</option>
+                    <option>地方自治体職員</option><option>団体職員</option><option>NPO/NGO職員</option><option>農家/農作業スタッフ</option><option>その他公務員/団体職員/農林水産</option>
+                  </optgroup>
                 </select>
               </div>
             </div>
@@ -430,19 +542,131 @@
           <label>職業カテゴリー <span class="required">必須</span></label>
           <select id="m_job_category">
             <option value="">（選択してください）</option>
-            <option>営業</option>
-            <option>販売・サービス</option>
-            <option>事務・管理</option>
-            <option>企画・マーケティング・経営・管理職</option>
-            <option>IT・機械・電気・電子</option>
-            <option>建設・土木・設備・設計</option>
-            <option>医療・介護・福祉</option>
-            <option>飲食・フード</option>
-            <option>製造・工場・物流・倉庫</option>
-            <option>保育・教育</option>
-            <option>農林水産</option>
-            <option>クリエイティブ</option>
-            <option>その他</option>
+            <optgroup label="営業">
+              <option>建築法人営業</option><option>建築個人営業</option><option>土木法人営業</option><option>不動産法人営業</option><option>不動産個人営業</option>
+              <option>IT/通信製品法人営業</option><option>Webサービス法人営業</option><option>人材/アウトソーシング法人営業</option>
+              <option>銀行法人営業</option><option>証券法人営業</option><option>保険法人営業</option><option>銀行個人営業</option><option>証券個人営業</option><option>保険個人営業</option><option>その他金融/保険営業</option>
+              <option>広告/メディア法人営業</option><option>食品/飲料/香料法人営業</option><option>医薬情報担当者/MR</option><option>医療機器法人営業</option><option>その他営業</option>
+            </optgroup>
+            <optgroup label="企画/マーケティング/カスタマーサポート">
+              <option>経営企画</option><option>事業企画</option><option>新規事業企画/開発</option><option>営業企画</option><option>商品企画</option>
+              <option>マーケティング戦略企画</option><option>広告運用</option><option>CRM/MA</option><option>Webサイト運営</option><option>ECサイト運営</option>
+              <option>コーポレートブランディング</option><option>カスタマーサクセスマネージャー</option>
+              <option>アウトバウンドコールスタッフ</option><option>インバウンドコールスタッフ</option><option>コールセンター管理/運営</option><option>その他カスタマーサポート/コールセンター</option><option>その他企画/マーケティング</option>
+            </optgroup>
+            <optgroup label="コーポレートスタッフ">
+              <option>管理会計</option><option>財務会計</option><option>税務</option><option>財務/ファイナンス</option>
+              <option>人事企画/制度設計</option><option>採用人事</option><option>社員教育/研修人事</option><option>福利厚生/労務/給与管理人事</option><option>その他人事</option>
+              <option>総務</option><option>法務</option><option>知的財産</option><option>特許</option><option>コンプライアンス</option>
+              <option>情報システム</option><option>情報セキュリティ</option><option>広報/PR</option><option>IR</option><option>内部監査</option><option>リスク管理</option><option>その他コーポレートスタッフ</option>
+            </optgroup>
+            <optgroup label="SCM/生産管理/購買/物流">
+              <option>生産管理</option><option>生産計画策定</option><option>需要予測</option><option>原材料購買</option><option>部品購買</option><option>その他購買/調達</option>
+              <option>物流企画/管理</option><option>倉庫管理</option><option>輸配送</option><option>貿易</option><option>その他SCM/生産管理/購買/物流</option>
+            </optgroup>
+            <optgroup label="事務/受付/秘書/翻訳">
+              <option>一般事務</option><option>営業事務</option><option>経理/財務事務</option><option>人事事務</option><option>総務事務</option>
+              <option>購買/物流事務</option><option>貿易事務/国際事務/英文事務</option><option>法務事務</option><option>特許事務</option><option>工場現場事務</option><option>その他事務</option>
+              <option>受付</option><option>秘書</option><option>通訳</option><option>翻訳</option>
+            </optgroup>
+            <optgroup label="小売販売/流通">
+              <option>コンビニ販売/フロアスタッフ</option><option>家電販売/フロアスタッフ</option><option>携帯ショップ販売/フロアスタッフ</option>
+              <option>薬局/ドラッグストア販売/フロアスタッフ</option><option>化粧品販売/フロアスタッフ</option>
+              <option>販売/フロアスタッフ（スーパー/ホームセンター）</option><option>販売/フロアスタッフ（アパレル/アクセサリー/インテリア）</option><option>その他販売/フロアスタッフ</option>
+              <option>薬局/ドラッグストア店長/支配人</option><option>その他店長/支配人</option><option>MD</option><option>仕入/バイヤー</option><option>その他小売/流通専門職</option>
+            </optgroup>
+            <optgroup label="サービス/接客">
+              <option>警備スタッフ/守衛</option><option>清掃スタッフ</option><option>ハウスクリーニングスタッフ</option><option>家事代行スタッフ/家政婦</option><option>ベビーシッター</option>
+              <option>イベント企画</option><option>イベント運営スタッフ</option><option>添乗員/ガイド/ツアコン</option><option>旅行手配員</option>
+              <option>フロント</option><option>ハウスキーピング</option><option>宿泊/ホテル責任者</option><option>その他宿泊/ホテルスタッフ</option>
+              <option>理容師</option><option>美容師</option><option>ネイリスト</option><option>エステティシャン</option><option>整体師</option><option>柔道整復師</option><option>セラピスト</option><option>美容部員</option><option>その他美容/リラクゼーションスタッフ</option>
+              <option>ウエディングプランナー</option><option>葬祭ディレクター/プランナー</option><option>マンション/ビル管理人</option>
+              <option>トレーナー/インストラクター</option><option>ガソリンスタンドスタッフ</option><option>デリバリー</option><option>その他サービス業</option>
+            </optgroup>
+            <optgroup label="飲食">
+              <option>飲食ホール/フロアスタッフ</option><option>飲食調理スタッフ</option><option>飲食店長/支配人</option><option>飲食エリアマネージャー</option>
+              <option>和食シェフ/料理人</option><option>イタリアンシェフ/料理人</option><option>フレンチシェフ/料理人</option><option>その他シェフ/料理人</option>
+              <option>パティシエ/菓子職人</option><option>ソムリエ/バーテンダー</option><option>バリスタ</option><option>パン職人</option><option>調理師</option><option>その他飲食</option>
+            </optgroup>
+            <optgroup label="コンサル/士業">
+              <option>戦略/経営コンサルタント</option><option>営業コンサルタント</option><option>マーケティングコンサルタント</option><option>財務/会計/税務コンサルタント</option>
+              <option>システムコンサルタント</option><option>SAP/ERP導入コンサルタント</option><option>セキュリティコンサルタント</option><option>その他IT/システムコンサルタント</option>
+              <option>会計士</option><option>税理士</option><option>弁護士</option><option>パラリーガル</option><option>弁理士/特許技術者</option>
+              <option>司法書士</option><option>行政書士</option><option>社会保険労務士</option><option>社会保険労務士補助</option><option>中小企業診断士</option>
+              <option>市場調査</option><option>マーケティングリサーチャー</option><option>リサーチ/分析アナリスト</option><option>その他コンサル/士業/リサーチャー</option>
+            </optgroup>
+            <optgroup label="IT">
+              <option>汎用機SE</option><option>web/オープンSE</option><option>組み込み制御SE</option>
+              <option>汎用機プログラマー</option><option>web/オープンプログラマー</option><option>組み込み制御プログラマー</option>
+              <option>web/オープンプロジェクトマネージャー</option><option>web/オープンプロジェクトリーダー</option><option>ディレクター</option><option>PMO</option><option>プロダクトマネージャー</option>
+              <option>フロントエンドエンジニア</option><option>サーバーサイドエンジニア</option><option>データベースエンジニア</option><option>ネットワークエンジニア</option>
+              <option>セキュリティエンジニア</option><option>データエンジニア</option><option>DevOpsエンジニア</option><option>アーキテクト</option>
+              <option>SRE（Site Reliability Engineer）</option><option>QA/テストエンジニア</option><option>保守/運用/サポートエンジニア</option>
+              <option>社内システムエンジニア</option><option>セールスエンジニア/プリセールス</option><option>データサイエンティスト</option><option>データアナリスト</option>
+              <option>エンジニアリングマネージャー/VP</option><option>その他IT</option>
+            </optgroup>
+            <optgroup label="クリエイティブ/デザイン職">
+              <option>Webプロデューサー</option><option>Webディレクター</option><option>Webデザイナー</option><option>UI/UXデザイナー</option><option>その他Webサービス/制作</option>
+              <option>クリエイティブディレクター</option><option>アートディレクター</option><option>グラフィックデザイナー</option><option>イラストレーター</option><option>コピーライター</option><option>その他広告/グラフィック</option>
+              <option>ゲームプロデューサー</option><option>ゲームプランナー</option><option>ゲームプログラマー</option><option>その他ゲーム</option>
+              <option>ファッションデザイナー</option><option>パタンナー</option><option>スタイリスト</option><option>その他アパレル/ファッション</option>
+              <option>プロダクトデザイナー/インダストリアルデザイナー</option><option>インテリアコーディネーター</option><option>インテリアデザイナー</option>
+              <option>ライター/編集</option><option>フォトグラファー</option><option>マークアップ/コーダー</option><option>その他クリエイティブ/デザイン職</option>
+            </optgroup>
+            <optgroup label="建築/土木/プラント専門職">
+              <option>建築意匠設計</option><option>建築構造設計</option><option>建築内装設計/インテリア</option><option>建築電気設備設計</option><option>建築空調設備設計</option>
+              <option>土木建設コンサルタント</option><option>土木構造設計</option><option>プラントプロセス設計</option><option>プラント配管設計</option>
+              <option>建築施工管理</option><option>土木施工管理</option><option>プラント施工管理</option><option>管工事施工管理</option><option>電気施工管理</option><option>空調設備施工管理</option>
+              <option>建築製図/CADオペレーター</option><option>土木製図/CADオペレーター</option><option>建築BIM/CIMエンジニア</option>
+              <option>職人/現場作業員</option><option>安全管理/環境保全</option><option>建築積算</option><option>土木積算</option>
+              <option>建築アフターサービス/フィールドエンジニア</option><option>その他建築/土木/プラント専門職</option>
+            </optgroup>
+            <optgroup label="不動産専門職">
+              <option>不動産事業開発</option><option>不動産用地仕入</option><option>不動産プロパティマネージャー</option><option>不動産ファシリティマネージャー</option>
+              <option>不動産マンション管理員</option><option>不動産ビルメンテナンス/管理員</option><option>宅建事務</option><option>不動産投資アセットマネジメント</option><option>その他不動産専門職</option>
+            </optgroup>
+            <optgroup label="機械/電気/電子製品専門職">
+              <option>機械研究開発</option><option>電気/電子研究開発</option><option>半導体研究開発</option><option>組込/制御研究開発</option>
+              <option>機構設計</option><option>回路設計</option><option>電気/電子デバイス設計</option><option>半導体デバイス設計</option><option>CAE解析</option>
+              <option>製図/CADオペレーター（機械/電気/電子製品専門職）</option><option>評価/実験/テスト（機械/電気/電子製品専門職）</option>
+              <option>機械生産技術</option><option>電気/電子生産技術</option><option>工程改善/IE</option>
+              <option>機械品質保証</option><option>電気/電子品質保証</option><option>機械品質管理</option><option>電気/電子品質管理</option>
+              <option>機械技術営業</option><option>電気/電子技術営業</option><option>設備保全/メンテナンス</option>
+              <option>組込/制御設計/開発（PLC/ラダー/シーケンス制御）</option><option>組込/制御設計/開発（アプリケーション）</option>
+              <option>機械製造オペレーター/ラインマネージャー</option><option>電気/電子製造オペレーター/ラインマネージャー</option><option>その他機械/電気/電子製品専門職</option>
+            </optgroup>
+            <optgroup label="医療/福祉専門職">
+              <option>医師</option><option>看護師</option><option>准看護師</option><option>助産師</option><option>保健師</option><option>看護助手</option>
+              <option>臨床工学技士</option><option>歯科医師</option><option>歯科衛生士</option><option>歯科技工士</option><option>歯科助手</option>
+              <option>理学療法士</option><option>作業療法士</option><option>言語聴覚士</option><option>視能訓練士</option><option>鍼灸師</option>
+              <option>栄養士</option><option>管理栄養士</option><option>臨床検査技師</option><option>診療放射線技師</option><option>医療事務</option><option>医療秘書</option>
+              <option>薬剤師</option><option>管理薬剤師</option><option>登録販売者</option><option>調剤補助員</option><option>調剤事務員</option>
+              <option>ケアマネージャー</option><option>介護福祉士</option><option>ケアワーカー</option><option>ホームヘルパー</option>
+              <option>生活相談員/生活支援員</option><option>福祉/介護事務</option><option>学童保育指導員</option><option>医療/福祉専門職その他</option>
+            </optgroup>
+            <optgroup label="金融専門職">
+              <option>金融ディーラー</option><option>トレーダー</option><option>ファンドマネジャー</option><option>アクチュアリー</option>
+              <option>融資/契約審査法人担当</option><option>融資/契約審査個人担当</option><option>債権回収法人担当</option>
+              <option>生保事務</option><option>損保事務</option><option>FP/ファイナンシャルアドバイザー</option><option>その他金融専門職</option>
+            </optgroup>
+            <optgroup label="交通/運輸/物流専門職">
+              <option>タクシードライバー/ハイヤードライバー</option><option>バス運転手</option><option>配送/宅配/セールスドライバー</option>
+              <option>運送ドライバー（中長距離）</option><option>その他ドライバー/乗務員</option><option>運行管理</option>
+              <option>倉庫作業スタッフ</option><option>倉庫/配送フォークリフトドライバー</option><option>物流フォワーダー</option><option>その他交通/運輸/物流専門職</option>
+            </optgroup>
+            <optgroup label="人材サービス専門職">
+              <option>キャリアアドバイザー</option><option>リクルーティングアドバイザー</option><option>ヘッドハンター</option>
+              <option>技術系派遣コーディネーター</option><option>事務系/非技術系派遣コーディネーター</option><option>BPO管理/運営</option><option>その他人材サービス専門職</option>
+            </optgroup>
+            <optgroup label="教育/保育専門職">
+              <option>保育士</option><option>幼稚園教諭</option><option>その他保育</option>
+              <option>学習塾講師</option><option>英語講師/トレーナー</option><option>日本語講師/トレーナー</option><option>その他講師/トレーナー</option>
+              <option>家庭教師</option><option>小学校教員</option><option>中学校教員</option><option>高校教員</option><option>心理カウンセラー</option><option>その他教育/保育専門職</option>
+            </optgroup>
+            <optgroup label="その他">
+              <option>CEO/社長/代表取締役/代表理事</option><option>財務責任者/CFO/Chief Financial Officer</option><option>技術責任者/CTO/Chief Technology Officer</option><option>その他エグゼクティブ</option>
+              <option>地方自治体職員</option><option>団体職員</option><option>NPO/NGO職員</option><option>農家/農作業スタッフ</option><option>その他公務員/団体職員/農林水産</option>
+            </optgroup>
           </select>
         </div>
       </div>
