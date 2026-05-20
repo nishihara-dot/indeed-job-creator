@@ -365,11 +365,14 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
         # 勤務地
         location = "".join(filter(None, [job.prefecture or "", job.city or ""]))
 
-        # 給与の最低≦最高を保証（逆転している場合はスワップ）
+        # 給与の最低＜最高を保証
         sal_min = job.salary_min
         sal_max = job.salary_max
-        if sal_min and sal_max and sal_min > sal_max:
-            sal_min, sal_max = sal_max, sal_min
+        if sal_min and sal_max:
+            if sal_min > sal_max:
+                sal_min, sal_max = sal_max, sal_min
+            if sal_min == sal_max:  # 同額はIndeedが拒否するため最高額を削除
+                sal_max = None
 
         # 旧形式の職業カテゴリーを有効値にマッピング
         _CAT_MAP = {
