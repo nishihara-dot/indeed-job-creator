@@ -203,7 +203,7 @@ async function generateJob() {
 function fillPreview(data) {
   const fields = [
     'job_title', 'company_name', 'prefecture', 'city',
-    'employment_type', 'salary_type',
+    'employment_type', 'salary_type', 'job_category',
     'description', 'requirements', 'preferred_skills',
     'working_hours', 'holidays', 'benefits', 'selection_process', 'contact_email',
   ];
@@ -282,6 +282,7 @@ function collectPreviewForm() {
     prefecture: val('p_prefecture'),
     city: val('p_city'),
     employment_type: val('p_employment_type'),
+    job_category: val('p_job_category'),
     salary_min: intOrNull('p_salary_min'),
     salary_max: intOrNull('p_salary_max'),
     salary_type: val('p_salary_type'),
@@ -574,7 +575,7 @@ function openEdit(id) {
   setVal('m_original_request', job.original_request || '');
   const fields = [
     'job_title', 'company_name', 'prefecture', 'city',
-    'employment_type', 'salary_type',
+    'employment_type', 'job_category', 'salary_type',
     'description', 'requirements', 'preferred_skills',
     'working_hours', 'holidays', 'benefits', 'selection_process',
     'contact_email', 'application_url',
@@ -600,6 +601,7 @@ async function saveEdit() {
     prefecture: val('m_prefecture'),
     city: val('m_city'),
     employment_type: val('m_employment_type'),
+    job_category: val('m_job_category'),
     salary_min: intOrNull('m_salary_min'),
     salary_max: intOrNull('m_salary_max'),
     salary_type: val('m_salary_type'),

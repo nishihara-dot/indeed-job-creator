@@ -38,6 +38,7 @@ class JobPosting(Base):
     haken_company_name = Column(String(200), nullable=True)
     haken_address = Column(String(500), nullable=True)
     haken_notes = Column(Text, nullable=True)
+    job_category = Column(String(100), nullable=True)
     original_request = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(

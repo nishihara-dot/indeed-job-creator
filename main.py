@@ -20,7 +20,7 @@ models.Base.metadata.create_all(bind=engine)
 # 既存DBへの列追加マイグレーション
 from sqlalchemy import text as _text
 with engine.connect() as _conn:
-    for _col in ["hire_count INTEGER", "haken_company_name VARCHAR(200)", "haken_address VARCHAR(500)", "haken_notes TEXT"]:
+    for _col in ["hire_count INTEGER", "haken_company_name VARCHAR(200)", "haken_address VARCHAR(500)", "haken_notes TEXT", "job_category VARCHAR(100)"]:
         try:
             _conn.execute(_text(f"ALTER TABLE job_postings ADD COLUMN {_col}"))
             _conn.commit()
@@ -80,6 +80,7 @@ class JobCreate(BaseModel):
     haken_company_name: Optional[str] = None
     haken_address: Optional[str] = None
     haken_notes: Optional[str] = None
+    job_category: Optional[str] = None
     appeal_points: Optional[str] = None
     application_url: Optional[str] = None
     contact_name: Optional[str] = None
@@ -123,6 +124,7 @@ def job_to_dict(job: JobPosting) -> dict:
         "haken_company_name": job.haken_company_name,
         "haken_address": job.haken_address,
         "haken_notes": job.haken_notes,
+        "job_category": job.job_category,
         "appeal_points": job.appeal_points,
         "application_url": job.application_url,
         "contact_name": job.contact_name,
@@ -363,31 +365,37 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
         # 勤務地
         location = "".join(filter(None, [job.prefecture or "", job.city or ""]))
 
+        # 給与の最低≦最高を保証（逆転している場合はスワップ）
+        sal_min = job.salary_min
+        sal_max = job.salary_max
+        if sal_min and sal_max and sal_min > sal_max:
+            sal_min, sal_max = sal_max, sal_min
+
         row = [
-            "募集中",                         # ステータス
-            job.company_name or "",          # 会社名
-            job.job_title or "",             # 職種名
-            "",                              # 職業カテゴリー
-            catchcopy,                       # 求人キャッチコピー
-            "",                              # 勤務地（郵便番号）
-            location,                        # 勤務地（都道府県・市区町村・町域）
-            "",                              # 勤務地（丁目・番地・号）
-            "",                              # 勤務地（建物名・階数）
-            job.employment_type or "",       # 雇用形態
-            "いいえ",                         # 有料職業紹介に該当
-            job.salary_type or "",           # 給与形態
-            job.salary_min or "",            # 給与（最低額）
-            job.salary_max or "",            # 給与（最高額）
-            "",                              # 給与（表示形式）
-            "", "", "", "", "", "", "",      # 固定残業代関連（7列）
-            "",                              # 勤務形態
-            "", "",                          # 平均所定労働時間
-            "", "",                          # 社会保険
-            "", "", "", "",                  # 試用期間
-            "", "", "", "",                  # 試用期間中の給与
-            "", "", "", "", "", "", "",      # 試用期間中の固定残業代（7列）
-            "", "",                          # 試用期間中の平均所定労働時間
-            "",                              # 試用期間中のその他の条件
+            "募集中",                              # ステータス
+            job.company_name or "",               # 会社名
+            job.job_title or "",                  # 職種名
+            job.job_category or "",               # 職業カテゴリー
+            catchcopy,                            # 求人キャッチコピー
+            "",                                   # 勤務地（郵便番号）
+            location,                             # 勤務地（都道府県・市区町村・町域）
+            "",                                   # 勤務地（丁目・番地・号）
+            "",                                   # 勤務地（建物名・階数）
+            job.employment_type or "",            # 雇用形態
+            "いいえ",                              # 有料職業紹介に該当
+            job.salary_type or "",                # 給与形態
+            sal_min or "",                        # 給与（最低額）
+            sal_max or "",                        # 給与（最高額）
+            job.salary_type or "",                # 給与（表示形式）
+            "", "", "", "", "", "", "",           # 固定残業代関連（7列）
+            "通常",                               # 勤務形態
+            "", "",                               # 平均所定労働時間
+            "加入", "",                           # 社会保険 / 適用されない理由
+            "なし", "", "", "",                   # 試用期間（有無・期間・単位・条件）
+            "", "", "", "",                       # 試用期間中の給与
+            "", "", "", "", "", "", "",           # 試用期間中の固定残業代（7列）
+            "", "",                               # 試用期間中の平均所定労働時間
+            "",                                   # 試用期間中のその他の条件
             job.description or "",           # 募集要項（仕事内容）
             appeal_text,                     # 募集要項（アピールポイント）
             requirements_combined,           # 募集要項（求める人材）

@@ -208,15 +208,36 @@
                 <input type="text" id="p_city">
               </div>
             </div>
-            <div class="form-group">
-              <label>雇用形態</label>
-              <select id="p_employment_type" onchange="toggleHakenSection('p')">
-                <option>正社員</option>
-                <option>契約社員</option>
-                <option>パート・アルバイト</option>
-                <option>派遣社員</option>
-                <option>業務委託</option>
-              </select>
+            <div class="form-row">
+              <div class="form-group">
+                <label>雇用形態</label>
+                <select id="p_employment_type" onchange="toggleHakenSection('p')">
+                  <option>正社員</option>
+                  <option>契約社員</option>
+                  <option>パート・アルバイト</option>
+                  <option>派遣社員</option>
+                  <option>業務委託</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>職業カテゴリー <span class="required">必須</span></label>
+                <select id="p_job_category">
+                  <option value="">（選択してください）</option>
+                  <option>営業</option>
+                  <option>販売・サービス</option>
+                  <option>事務・管理</option>
+                  <option>企画・マーケティング・経営・管理職</option>
+                  <option>IT・機械・電気・電子</option>
+                  <option>建設・土木・設備・設計</option>
+                  <option>医療・介護・福祉</option>
+                  <option>飲食・フード</option>
+                  <option>製造・工場・物流・倉庫</option>
+                  <option>保育・教育</option>
+                  <option>農林水産</option>
+                  <option>クリエイティブ</option>
+                  <option>その他</option>
+                </select>
+              </div>
             </div>
 
             <div class="section-label" style="margin-top:16px">給与</div>
@@ -394,15 +415,36 @@
           <input type="text" id="m_city">
         </div>
       </div>
-      <div class="form-group">
-        <label>雇用形態</label>
-        <select id="m_employment_type" onchange="toggleHakenSection('m')">
-          <option>正社員</option>
-          <option>契約社員</option>
-          <option>パート・アルバイト</option>
-          <option>派遣社員</option>
-          <option>業務委託</option>
-        </select>
+      <div class="form-row">
+        <div class="form-group">
+          <label>雇用形態</label>
+          <select id="m_employment_type" onchange="toggleHakenSection('m')">
+            <option>正社員</option>
+            <option>契約社員</option>
+            <option>パート・アルバイト</option>
+            <option>派遣社員</option>
+            <option>業務委託</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>職業カテゴリー <span class="required">必須</span></label>
+          <select id="m_job_category">
+            <option value="">（選択してください）</option>
+            <option>営業</option>
+            <option>販売・サービス</option>
+            <option>事務・管理</option>
+            <option>企画・マーケティング・経営・管理職</option>
+            <option>IT・機械・電気・電子</option>
+            <option>建設・土木・設備・設計</option>
+            <option>医療・介護・福祉</option>
+            <option>飲食・フード</option>
+            <option>製造・工場・物流・倉庫</option>
+            <option>保育・教育</option>
+            <option>農林水産</option>
+            <option>クリエイティブ</option>
+            <option>その他</option>
+          </select>
+        </div>
       </div>
       <div class="salary-row">
         <div class="form-group">
