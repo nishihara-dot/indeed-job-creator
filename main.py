@@ -390,6 +390,8 @@ def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
         }
         job_category_csv = job.job_category or ""
         job_category_csv = _CAT_MAP.get(job_category_csv, job_category_csv)
+        if not job_category_csv:
+            job_category_csv = "一般事務"  # 未設定レコードのフォールバック
 
         row = [
             "募集中",                              # ステータス
