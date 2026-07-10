@@ -17,6 +17,7 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="create">✏️ 求人作成</button>
   <button class="tab-btn" data-tab="list">📂 保存済み求人</button>
+  <button class="tab-btn" data-tab="bulk">📤 Excel一括変換</button>
   <button class="tab-btn" data-tab="settings">⚙️ 設定</button>
 </div>
 
@@ -463,6 +464,29 @@
         <p>保存済みの求人はありません</p>
         <p style="margin-top:8px;font-size:13px;">「求人作成」タブから求人を生成・保存してください</p>
       </div>
+    </div>
+  </div>
+  <!-- ===== TAB: Excel一括変換 ===== -->
+  <div class="tab-panel" id="tab-bulk">
+    <div class="card" style="max-width:720px">
+      <div class="card-title">📤 Jobbudy求人一覧 → Indeed一括アップロード形式に変換</div>
+      <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px">
+        Jobbudyからダウンロードした
+        <code>【求人一覧】○○○○（全求人）.xlsx</code>
+        を添付すると、Indeedの一括アップロード用テンプレート形式に自動変換します。<br>
+        1ファイルあたり <strong>999件</strong> を上限に自動分割し、複数になる場合はZIPでまとめてダウンロードします。
+      </p>
+
+      <div class="form-group">
+        <label>求人一覧Excelファイル（.xlsx / .xls）</label>
+        <input type="file" id="bulk-file" accept=".xlsx,.xls">
+      </div>
+
+      <button class="btn btn-primary" id="bulk-convert-btn" onclick="bulkConvert()">
+        🔄 Indeed形式に変換してダウンロード
+      </button>
+
+      <div id="bulk-status" style="margin-top:16px;font-size:13px;color:var(--text-sub);display:none"></div>
     </div>
   </div>
   <!-- ===== TAB: 設定 ===== -->

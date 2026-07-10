@@ -8,12 +8,15 @@ from typing import Optional, List
 import csv
 import io
 import json
+import zipfile
+from urllib.parse import quote
 from datetime import datetime, timezone
 
 from database import get_db, engine
 import models
 from models import JobPosting, Setting
 from ai_service import generate_job_posting
+from bulk_convert import convert_jobbudy_to_indeed
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -192,6 +195,56 @@ async def extract_text(file: UploadFile = File(...)):
     if not text:
         raise HTTPException(status_code=400, detail="ファイルからテキストを抽出できませんでした")
     return {"text": text, "filename": file.filename}
+
+
+@app.post("/api/bulk-convert")
+async def bulk_convert(file: UploadFile = File(...)):
+    """Jobbudyの求人一覧Excelを取り込み、Indeed形式に一括変換。
+    999件ごとに分割し、複数ファイルになる場合はZIPで返す。"""
+    name = file.filename or ""
+    if not name.lower().endswith((".xlsx", ".xls")):
+        raise HTTPException(status_code=400, detail="Excelファイル（.xlsx / .xls）を添付してください")
+    if file.size and file.size > 150 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="ファイルサイズは150MB以下にしてください")
+
+    content = await file.read()
+    try:
+        files, stats = convert_jobbudy_to_indeed(content, source_filename=name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"変換に失敗しました: {e}")
+
+    if not files or stats["converted"] == 0:
+        raise HTTPException(status_code=400, detail="変換できる求人がありませんでした")
+
+    stats_header = {
+        "X-Convert-Total": str(stats["total"]),
+        "X-Convert-Converted": str(stats["converted"]),
+        "X-Convert-Skipped": str(stats["skipped"]),
+        "X-Convert-Parts": str(stats["parts"]),
+        "Access-Control-Expose-Headers": "Content-Disposition,X-Convert-Total,X-Convert-Converted,X-Convert-Skipped,X-Convert-Parts",
+    }
+
+    # 1ファイルのみならxlsxをそのまま、複数ならZIPにまとめて返す
+    if len(files) == 1:
+        fname, data = files[0]
+        # 日本語ファイル名はRFC 5987でエンコード（HTTPヘッダはlatin-1のため）
+        disposition = f"attachment; filename=indeed_jobs.xlsx; filename*=UTF-8''{quote(fname)}"
+        return Response(
+            content=data,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": disposition, **stats_header},
+        )
+
+    zip_buf = io.BytesIO()
+    with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for fname, data in files:
+            zf.writestr(fname, data)
+    zip_name = f"indeed_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    return Response(
+        content=zip_buf.getvalue(),
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename={zip_name}", **stats_header},
+    )
 
 
 @app.get("/api/settings")

@@ -427,6 +427,65 @@ async function exportSelected() {
 }
 
 // ──────────────────────────────────────────────
+// Bulk convert (Jobbudy Excel → Indeed)
+// ──────────────────────────────────────────────
+async function bulkConvert() {
+  const input = document.getElementById('bulk-file');
+  const file = input.files[0];
+  if (!file) {
+    toast('Excelファイルを選択してください', 'error');
+    return;
+  }
+  const btn = document.getElementById('bulk-convert-btn');
+  const status = document.getElementById('bulk-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ 変換中...';
+  status.style.display = 'block';
+  status.textContent = 'ファイルを変換しています。件数が多い場合は数十秒かかることがあります…';
+
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/bulk-convert', { method: 'POST', body: fd });
+    if (!res.ok) {
+      let detail = 'エラーが発生しました';
+      try { detail = (await res.json()).detail; } catch (_) {}
+      throw new Error(detail);
+    }
+
+    // 統計ヘッダ
+    const total = res.headers.get('X-Convert-Total');
+    const converted = res.headers.get('X-Convert-Converted');
+    const skipped = res.headers.get('X-Convert-Skipped');
+    const parts = res.headers.get('X-Convert-Parts');
+
+    // ファイル名（Content-Dispositionから）
+    const cd = res.headers.get('Content-Disposition') || '';
+    const m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+    const filename = m ? decodeURIComponent(m[1]) : `indeed_jobs_${dateStr()}.zip`;
+
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+
+    status.innerHTML =
+      `✅ 変換完了：元 ${total}件 → 変換 ${converted}件` +
+      (skipped && skipped !== '0' ? `（スキップ ${skipped}件）` : '') +
+      ` / ${parts}ファイルに分割`;
+    toast(`変換完了：${converted}件 / ${parts}ファイル`, 'success');
+  } catch (e) {
+    status.innerHTML = `❌ ${esc(e.message)}`;
+    toast('変換に失敗しました: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 Indeed形式に変換してダウンロード';
+  }
+}
+
+// ──────────────────────────────────────────────
 // Delete
 // ──────────────────────────────────────────────
 async function deleteJob(id) {
