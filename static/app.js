@@ -407,20 +407,22 @@ function updateSelectionUI() {
 // ──────────────────────────────────────────────
 async function exportSelected() {
   if (selectedIds.size === 0) return;
+  const target = (document.getElementById('export-target') || {}).value || 'indeed';
+  const targetLabel = target === 'atally' ? 'Atally' : 'Indeed';
   try {
     const res = await fetch('/api/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ job_ids: Array.from(selectedIds) }),
+      body: JSON.stringify({ job_ids: Array.from(selectedIds), target }),
     });
     if (!res.ok) throw new Error((await res.json()).detail);
     const blob = await res.blob();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `indeed_jobs_${dateStr()}.csv`;
+    a.download = `${target}_jobs_${dateStr()}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
-    toast(`${selectedIds.size}件の求人をエクスポートしました`, 'success');
+    toast(`${selectedIds.size}件を${targetLabel}形式でエクスポートしました`, 'success');
   } catch (e) {
     toast('エクスポートに失敗しました: ' + e.message, 'error');
   }

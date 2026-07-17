@@ -17,7 +17,7 @@ import models
 from models import JobPosting, Setting
 from ai_service import generate_job_posting
 from bulk_convert import convert_jobbudy_to_indeed
-from atally_convert import convert_jobbudy_to_atally
+from atally_convert import convert_jobbudy_to_atally, ATALLY_HEADERS, _major_category
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -100,6 +100,7 @@ class JobUpdate(JobCreate):
 
 class ExportRequest(BaseModel):
     job_ids: List[int]
+    target: str = "indeed"  # "indeed"（既定）または "atally"
 
 
 # ---------- helpers ----------
@@ -373,11 +374,122 @@ def _build_other(job) -> str:
     return "\n\n".join(parts)
 
 
+def _build_atally_row_from_job(job) -> list:
+    """保存済み求人(JobPosting) → Atally 64列(list)。
+    Atally固有列（給与補足・昇給・社風など）はモデルに無ければ getattr で空になる。"""
+    def g(attr):
+        v = getattr(job, attr, None)
+        return v if v not in (None,) else ""
+
+    # アピールポイント
+    appeal_pts = []
+    if job.appeal_points:
+        try:
+            appeal_pts = json.loads(job.appeal_points)
+        except Exception:
+            appeal_pts = [job.appeal_points]
+    appeal_text = "\n".join(appeal_pts)
+
+    requirements_combined = "\n".join(filter(None, [
+        job.requirements or "",
+        f"【歓迎】\n{job.preferred_skills}" if job.preferred_skills else "",
+    ]))
+
+    prefecture = job.prefecture or ""
+    city = job.city or ""
+    location = prefecture + city
+
+    sal_min = job.salary_min
+    sal_max = job.salary_max
+    if sal_min and sal_max and sal_min > sal_max:
+        sal_min, sal_max = sal_max, sal_min
+
+    major = g("job_category_major") or _major_category(job.job_category or "", "")
+    recruitment_kind = "人材派遣" if job.employment_type == "派遣社員" else "人材紹介"
+    notes_combined = "\n\n".join(filter(None, [g("notes"), _build_other(job)]))
+
+    return [
+        job.job_title or "",                 # 求人タイトル
+        job.description or "",               # 仕事内容
+        requirements_combined,               # 応募要件
+        major,                               # 職種カテゴリ（大）
+        job.job_category or "",              # 職種カテゴリ（小）
+        "中途",                               # 採用区分
+        sal_min if sal_min is not None else "",  # 給与下限（円）
+        sal_max if sal_max is not None else "",  # 給与上限（円）
+        job.salary_type or "",               # 給与形態
+        g("salary_details"),                 # 給与補足
+        g("raise_frequency"),                # 昇給
+        g("bonus"),                          # 賞与
+        prefecture,                          # 都道府県
+        city,                                # 市区町村
+        location,                            # 勤務地
+        g("haken_address"),                  # 詳細住所
+        g("nearest_station"),                # 最寄り駅
+        g("access"),                         # アクセス
+        g("transfer_policy"),                # 転勤の有無
+        job.employment_type or "",           # 雇用形態
+        job.working_hours or "",             # 勤務時間
+        g("remote_policy"),                  # リモート
+        g("overtime"),                       # 残業時間
+        "",                                  # 契約期間
+        job.holidays or "",                  # 休日
+        "",                                  # 休日詳細
+        job.benefits or "",                  # 手当
+        g("probation"),                      # 試用期間
+        "",                                  # 試用期間条件
+        job.selection_process or "",         # 選考フロー
+        "",                                  # 必要書類
+        "",                                  # 選考期間
+        g("company_culture"),                # 社風
+        g("work_environment"),               # 職場環境
+        "",                                  # 従業員数
+        "",                                  # 設立年
+        g("industry"),                       # 業種
+        appeal_text,                         # アピールポイント
+        notes_combined,                      # 備考
+        "false",                             # 紹介許可
+        "",                                  # 手数料タイプ
+        "",                                  # 手数料
+        "",                                  # 紹介条件
+        recruitment_kind,                    # 求人種別
+        job.haken_company_name or "",        # 派遣元（雇用主）企業名
+        "", "", "", "",                      # ペルソナ_年齢下限/上限/経験下限/上限
+        job.preferred_skills or "",          # ペルソナ_求めるスキル
+        prefecture,                          # ペルソナ_対象勤務地
+        job.job_category or "",              # ペルソナ_対象職種
+        "", "",                              # ペルソナ_就業状態/学歴条件
+        g("industry"),                       # ペルソナ_対象業界
+        "", "", "", "", "",                  # 希望年収下限/上限/求める資格/マネジメント/最大転職回数
+        "", "", "",                          # ペルソナ_人物像/NG条件/理想の候補者
+        "1.0",                               # ペルソナ_ブースト係数
+    ]
+
+
+def _export_atally_csv(jobs) -> bytes:
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(ATALLY_HEADERS)
+    for job in jobs:
+        writer.writerow(_build_atally_row_from_job(job))
+    return b'\xef\xbb\xbf' + output.getvalue().encode("utf-8")
+
+
 @app.post("/api/export")
 def export_jobs(req: ExportRequest, db: Session = Depends(get_db)):
     jobs = db.query(JobPosting).filter(JobPosting.id.in_(req.job_ids)).all()
     if not jobs:
         raise HTTPException(status_code=404, detail="エクスポート対象の求人が見つかりません")
+
+    # Atally形式でエクスポート
+    if (req.target or "indeed").lower() == "atally":
+        csv_bytes = _export_atally_csv(jobs)
+        filename = f"atally_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        return Response(
+            content=csv_bytes,
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
 
     output = io.StringIO()
     writer = csv.writer(output)

@@ -432,6 +432,10 @@
           <button class="btn btn-secondary btn-sm" onclick="toggleSelectAll()">全選択 / 解除</button>
           <span class="selected-count" id="selected-count">0件選択中</span>
         </div>
+        <select id="export-target" class="btn-sm" style="padding:4px 8px" title="出力フォーマット">
+          <option value="indeed">Indeed形式</option>
+          <option value="atally">Atally形式</option>
+        </select>
         <button class="btn btn-primary btn-sm" onclick="exportSelected()" id="export-btn" disabled>
           📥 選択をCSVエクスポート
         </button>
