@@ -224,14 +224,14 @@ async def bulk_convert(file: UploadFile = File(...)):
         "Access-Control-Expose-Headers": "Content-Disposition,X-Convert-Total,X-Convert-Converted,X-Convert-Skipped,X-Convert-Parts",
     }
 
-    # 1ファイルのみならxlsxをそのまま、複数ならZIPにまとめて返す
+    # 1ファイルのみならCSVをそのまま、複数ならZIPにまとめて返す
     if len(files) == 1:
         fname, data = files[0]
         # 日本語ファイル名はRFC 5987でエンコード（HTTPヘッダはlatin-1のため）
-        disposition = f"attachment; filename=indeed_jobs.xlsx; filename*=UTF-8''{quote(fname)}"
+        disposition = f"attachment; filename=indeed_jobs.csv; filename*=UTF-8''{quote(fname)}"
         return Response(
             content=data,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            media_type="text/csv; charset=utf-8",
             headers={"Content-Disposition": disposition, **stats_header},
         )
 

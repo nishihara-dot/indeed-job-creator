@@ -1,21 +1,23 @@
 """
 Jobbudyの求人一覧Excel（【求人一覧】○○○○（全求人）.xlsx等）を
-Indeed一括アップロード用テンプレート形式に変換するモジュール。
+Indeed一括アップロード用形式（CSV）に変換するモジュール。
 
 - 変換ロジックは既存の indeed_converter_fixed.py を踏襲
+- PythonAnywhere等の軽量環境でもタイムアウト/メモリ超過しにくいよう
+  openpyxl read_only でストリーミング読み込み、出力はCSV（xlsxより桁違いに軽量）
 - ディスクに書かず、メモリ上で (ファイル名, bytes) のリストを返す
 - Indeedの上限に合わせて chunk_size 件（既定999）ごとに分割
 """
+import csv
 import io
 import re
 from pathlib import Path
 
-# pandas/openpyxl は重量級のため、未導入環境でもアプリ本体が起動できるよう遅延インポート。
-# 変換実行時にのみ必要。未導入なら convert_jobbudy_to_indeed() 呼び出し時に明示エラーを返す。
+# openpyxl は読み込み（Excel）にのみ必要。未導入でもアプリ本体が起動できるよう遅延インポート。
 try:
-    import pandas as pd
+    import openpyxl
 except ImportError:  # pragma: no cover
-    pd = None
+    openpyxl = None
 
 BASE_DIR = Path(__file__).parent
 TEMPLATE_PATH = BASE_DIR / "indeed_template.xlsx"
@@ -100,10 +102,18 @@ _CATEGORY_MAP = {
 }
 
 
+def _isna(v):
+    """None / 空文字 / 'nan' を欠損とみなす"""
+    if v is None:
+        return True
+    s = str(v).strip()
+    return s == "" or s.lower() == "nan"
+
+
 def _clean_discriminatory_text(text):
     """差別的・NGとなり得る表現を置き換える"""
-    if pd.isna(text):
-        return text
+    if _isna(text):
+        return ""
     text_str = str(text)
     for ng_word, replacement in _NG_REPLACEMENTS.items():
         if ng_word in text_str:
@@ -114,26 +124,30 @@ def _clean_discriminatory_text(text):
 def _num(val):
     """カンマ・「円」を除いた数値に変換。失敗時は None"""
     try:
-        return float(str(val).replace(",", "").replace("円", "").strip())
+        f = float(str(val).replace(",", "").replace("円", "").strip())
+        # 12345.0 → 12345 のように整数へ寄せる（給与額は整数想定）
+        return int(f) if f == int(f) else f
     except (ValueError, TypeError):
         return None
 
 
 def _load_template_columns():
-    """テンプレートの列名（重複除去済み）と生の列名を返す"""
-    df_template = pd.read_excel(TEMPLATE_PATH, header=0)
-    raw = df_template.columns.tolist()
+    """テンプレートの列名（重複除去済み・出力の列順）を返す"""
+    wb = openpyxl.load_workbook(TEMPLATE_PATH, read_only=True)
+    ws = wb.active
+    raw = [str(c) if c is not None else "" for c in next(ws.iter_rows(values_only=True))]
+    wb.close()
     clean = []
     for col in raw:
-        base = re.sub(r"\.\d+$", "", str(col))
-        if base not in clean:
+        base = re.sub(r"\.\d+$", "", col)  # pandas由来の .1/.2 は無いが念のため
+        if base and base not in clean:
             clean.append(base)
     return clean
 
 
 def _convert_row(row, cols):
-    """1求人（Jobbudy行）→ Indeedテンプレート1行(dict)"""
-    d = {c: pd.NA for c in cols}
+    """1求人（Jobbudy行のdict）→ Indeedテンプレート1行(dict)。値は文字列/数値、欠損は空文字。"""
+    d = {c: "" for c in cols}
 
     def has(col):
         return col in cols
@@ -142,7 +156,7 @@ def _convert_row(row, cols):
         return row.get(col)
 
     def notna(col):
-        return pd.notna(row.get(col))
+        return not _isna(row.get(col))
 
     # ---- 直接マッピング ----
     if has("会社名") and notna("会社名"):
@@ -240,7 +254,7 @@ def _convert_row(row, cols):
         intro = [BRAND_LINE, "【事業内容】 人材派遣・職業紹介", ""]
         job_id = get("求人ID")
         job_id_str = ""
-        if pd.notna(job_id):
+        if not _isna(job_id):
             job_id_str = str(int(job_id)) if isinstance(job_id, (int, float)) else str(job_id).strip()
         if job_id_str and job_id_str != "nan":
             intro.append(f"この求人（求人ID：{job_id_str}）は職業紹介事業者による紹介求人です。")
@@ -299,7 +313,7 @@ def _convert_row(row, cols):
             insurance_list = ["雇用保険", "労災保険", "健康保険", "厚生年金"]
     all_insurance_applied = len(insurance_list) == 4
     if has("社会保険"):
-        d["社会保険"] = ",".join(insurance_list) if insurance_list else pd.NA
+        d["社会保険"] = ",".join(insurance_list) if insurance_list else ""
     if has("社会保険（適用されない理由）"):
         if notna("社会保険（適用されない理由）"):
             d["社会保険（適用されない理由）"] = str(get("社会保険（適用されない理由）")).replace("\n", "").replace("\r", "")[:256]
@@ -366,55 +380,88 @@ def _convert_row(row, cols):
 def _zipcode_is_dummy(row):
     """郵便番号が0000000のダミー行か判定"""
     for col in ("就業先郵便番号", "郵便番号"):
-        if col in row and pd.notna(row.get(col)):
-            zc = str(row.get(col)).strip().replace("-", "").replace("−", "")
+        v = row.get(col)
+        if not _isna(v):
+            zc = str(v).strip().replace("-", "").replace("−", "")
             if zc == "0" * 7:
                 return True
     return False
+
+
+def _iter_input_rows(job_bytes: bytes):
+    """入力Excelを openpyxl read_only でストリーミングし、行dictを yield"""
+    wb = openpyxl.load_workbook(io.BytesIO(job_bytes), read_only=True, data_only=True)
+    try:
+        ws = wb.active
+        row_iter = ws.iter_rows(values_only=True)
+        header = [str(c).strip() if c is not None else "" for c in next(row_iter)]
+        for values in row_iter:
+            # 完全な空行はスキップ
+            if all(v is None or (isinstance(v, str) and v.strip() == "") for v in values):
+                continue
+            yield dict(zip(header, values))
+    finally:
+        wb.close()
+
+
+def _chunk_to_csv_bytes(cols, chunk_rows):
+    """列名+行dict群 → CSV(UTF-8 BOM)バイト列"""
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=cols, extrasaction="ignore")
+    writer.writeheader()
+    for r in chunk_rows:
+        writer.writerow(r)
+    return b"\xef\xbb\xbf" + buf.getvalue().encode("utf-8")
 
 
 def convert_jobbudy_to_indeed(job_bytes: bytes, source_filename: str = "求人一覧",
                               chunk_size: int = CHUNK_SIZE):
     """
     Jobbudyの求人一覧Excelバイト列を受け取り、Indeed形式に変換した
-    分割済みxlsxファイル群を返す。
+    分割済みCSVファイル群を返す。
 
     戻り値:
-        files: list[(filename: str, data: bytes)]
+        files: list[(filename: str, data: bytes)]  ... UTF-8 BOM付きCSV
         stats: dict  ... {"total": 元件数, "converted": 変換件数, "skipped": スキップ数, "parts": 分割数}
     """
-    if pd is None:
+    if openpyxl is None:
         raise RuntimeError(
-            "pandas / openpyxl が未インストールです。"
-            "サーバーで `pip install pandas openpyxl` を実行してください。"
+            "openpyxl が未インストールです。サーバーで `pip install openpyxl` を実行してください。"
         )
-    df_jobs = pd.read_excel(io.BytesIO(job_bytes))
+
     cols = _load_template_columns()
-
-    total = len(df_jobs)
-    skipped = 0
-    rows = []
-    for _, row in df_jobs.iterrows():
-        row_dict = row.to_dict()
-        if _zipcode_is_dummy(row_dict):
-            skipped += 1
-            continue
-        rows.append(_convert_row(row_dict, cols))
-
-    df_out = pd.DataFrame(rows, columns=cols)
-    df_out.drop_duplicates(inplace=True)
-    converted = len(df_out)
-
-    # ソースファイル名から拡張子を除いた stem を出力名に使う
     stem = re.sub(r"\.(xlsx|xls|csv)$", "", source_filename, flags=re.IGNORECASE) or "求人一覧"
 
-    num_chunks = max(1, (converted + chunk_size - 1) // chunk_size)
-    files = []
-    for i in range(num_chunks):
-        chunk = df_out.iloc[i * chunk_size:(i + 1) * chunk_size]
-        buf = io.BytesIO()
-        chunk.to_excel(buf, index=False, engine="openpyxl")
-        files.append((f"{stem}_indeed_part{i + 1:03d}.xlsx", buf.getvalue()))
+    total = 0
+    skipped = 0
+    converted = 0
+    seen = set()          # 重複判定はハッシュのみ保持（メモリ削減）
+    files = []            # (filename, csv_bytes)
+    chunk = []            # 現在のチャンク（最大 chunk_size 件）
 
-    stats = {"total": total, "converted": converted, "skipped": skipped, "parts": num_chunks}
+    def flush():
+        if not chunk:
+            return
+        data = _chunk_to_csv_bytes(cols, chunk)
+        files.append((f"{stem}_indeed_part{len(files) + 1:03d}.csv", data))
+        chunk.clear()
+
+    for row in _iter_input_rows(job_bytes):
+        total += 1
+        if _zipcode_is_dummy(row):
+            skipped += 1
+            continue
+        out = _convert_row(row, cols)
+        # 変換後の重複行を除去（列順の値をハッシュ化して判定）
+        key = hash("\x00".join(str(out.get(c, "")) for c in cols))
+        if key in seen:
+            continue
+        seen.add(key)
+        converted += 1
+        chunk.append(out)
+        if len(chunk) >= chunk_size:
+            flush()
+    flush()
+
+    stats = {"total": total, "converted": converted, "skipped": skipped, "parts": len(files)}
     return files, stats
