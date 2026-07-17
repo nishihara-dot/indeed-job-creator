@@ -436,6 +436,8 @@ async function bulkConvert() {
     toast('Excelファイルを選択してください', 'error');
     return;
   }
+  const target = (document.getElementById('bulk-target') || {}).value || 'indeed';
+  const targetLabel = target === 'atally' ? 'Atally' : 'Indeed';
   const btn = document.getElementById('bulk-convert-btn');
   const status = document.getElementById('bulk-status');
   btn.disabled = true;
@@ -446,6 +448,7 @@ async function bulkConvert() {
   try {
     const fd = new FormData();
     fd.append('file', file);
+    fd.append('target', target);
     const res = await fetch('/api/bulk-convert', { method: 'POST', body: fd });
     if (!res.ok) {
       let detail = 'エラーが発生しました';
@@ -462,7 +465,7 @@ async function bulkConvert() {
     // ファイル名（Content-Dispositionから）
     const cd = res.headers.get('Content-Disposition') || '';
     const m = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
-    const filename = m ? decodeURIComponent(m[1]) : `indeed_jobs_${dateStr()}.zip`;
+    const filename = m ? decodeURIComponent(m[1]) : `${target}_jobs_${dateStr()}.zip`;
 
     const blob = await res.blob();
     const a = document.createElement('a');
@@ -472,16 +475,16 @@ async function bulkConvert() {
     URL.revokeObjectURL(a.href);
 
     status.innerHTML =
-      `✅ 変換完了：元 ${total}件 → 変換 ${converted}件` +
+      `✅ ${targetLabel}形式に変換完了：元 ${total}件 → 変換 ${converted}件` +
       (skipped && skipped !== '0' ? `（スキップ ${skipped}件）` : '') +
       ` / ${parts}ファイルに分割`;
-    toast(`変換完了：${converted}件 / ${parts}ファイル`, 'success');
+    toast(`${targetLabel}形式に変換完了：${converted}件 / ${parts}ファイル`, 'success');
   } catch (e) {
     status.innerHTML = `❌ ${esc(e.message)}`;
     toast('変換に失敗しました: ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '🔄 Indeed形式に変換してダウンロード';
+    btn.textContent = '🔄 変換してダウンロード';
   }
 }
 

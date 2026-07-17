@@ -469,13 +469,22 @@
   <!-- ===== TAB: Excel一括変換 ===== -->
   <div class="tab-panel" id="tab-bulk">
     <div class="card" style="max-width:720px">
-      <div class="card-title">📤 Jobbudy求人一覧 → Indeed一括アップロード形式に変換</div>
+      <div class="card-title">📤 Jobbudy求人一覧 → Indeed / Atally 形式に一括変換</div>
       <p style="font-size:13px;color:var(--text-sub);margin-bottom:16px">
         Jobbudyからダウンロードした
         <code>【求人一覧】○○○○（全求人）.xlsx</code>
-        を添付すると、Indeedの一括アップロード用テンプレート形式に自動変換します。<br>
-        1ファイルあたり <strong>999件</strong> を上限に自動分割し、複数になる場合はZIPでまとめてダウンロードします。
+        を添付すると、選択した形式の一括アップロード用CSVに自動変換します。<br>
+        件数が多い場合は自動分割し、複数になる場合はZIPでまとめてダウンロードします。
       </p>
+
+      <div class="form-group">
+        <label>出力フォーマット</label>
+        <select id="bulk-target">
+          <option value="indeed">Indeed形式（69列）</option>
+          <option value="atally">Atally形式（64列）</option>
+        </select>
+        <div class="field-hint">Atally形式はJobbudyの元データから直接変換し、昇給・賞与・社風などの項目も反映します。</div>
+      </div>
 
       <div class="form-group">
         <label>求人一覧Excelファイル（.xlsx / .xls）</label>
@@ -483,7 +492,7 @@
       </div>
 
       <button class="btn btn-primary" id="bulk-convert-btn" onclick="bulkConvert()">
-        🔄 Indeed形式に変換してダウンロード
+        🔄 変換してダウンロード
       </button>
 
       <div id="bulk-status" style="margin-top:16px;font-size:13px;color:var(--text-sub);display:none"></div>

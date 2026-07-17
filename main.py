@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, StreamingResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +17,7 @@ import models
 from models import JobPosting, Setting
 from ai_service import generate_job_posting
 from bulk_convert import convert_jobbudy_to_indeed
+from atally_convert import convert_jobbudy_to_atally
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -198,23 +199,33 @@ async def extract_text(file: UploadFile = File(...)):
 
 
 @app.post("/api/bulk-convert")
-async def bulk_convert(file: UploadFile = File(...)):
-    """Jobbudyの求人一覧Excelを取り込み、Indeed形式に一括変換。
-    999件ごとに分割し、複数ファイルになる場合はZIPで返す。"""
+async def bulk_convert(file: UploadFile = File(...), target: str = Form("indeed")):
+    """Jobbudyの求人一覧Excelを取り込み、Indeed形式またはAtally形式に一括変換。
+    件数ごとに分割し、複数ファイルになる場合はZIPで返す。
+    target: "indeed"（既定）または "atally"。"""
     name = file.filename or ""
     if not name.lower().endswith((".xlsx", ".xls")):
         raise HTTPException(status_code=400, detail="Excelファイル（.xlsx / .xls）を添付してください")
     if file.size and file.size > 150 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="ファイルサイズは150MB以下にしてください")
 
+    target = (target or "indeed").lower()
+    if target not in ("indeed", "atally"):
+        raise HTTPException(status_code=400, detail="target は indeed または atally を指定してください")
+
     content = await file.read()
     try:
-        files, stats = convert_jobbudy_to_indeed(content, source_filename=name)
+        if target == "atally":
+            files, stats = convert_jobbudy_to_atally(content, source_filename=name)
+        else:
+            files, stats = convert_jobbudy_to_indeed(content, source_filename=name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"変換に失敗しました: {e}")
 
     if not files or stats["converted"] == 0:
         raise HTTPException(status_code=400, detail="変換できる求人がありませんでした")
+
+    prefix = "atally_jobs" if target == "atally" else "indeed_jobs"
 
     stats_header = {
         "X-Convert-Total": str(stats["total"]),
@@ -228,7 +239,7 @@ async def bulk_convert(file: UploadFile = File(...)):
     if len(files) == 1:
         fname, data = files[0]
         # 日本語ファイル名はRFC 5987でエンコード（HTTPヘッダはlatin-1のため）
-        disposition = f"attachment; filename=indeed_jobs.csv; filename*=UTF-8''{quote(fname)}"
+        disposition = f"attachment; filename={prefix}.csv; filename*=UTF-8''{quote(fname)}"
         return Response(
             content=data,
             media_type="text/csv; charset=utf-8",
@@ -239,7 +250,7 @@ async def bulk_convert(file: UploadFile = File(...)):
     with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
         for fname, data in files:
             zf.writestr(fname, data)
-    zip_name = f"indeed_jobs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    zip_name = f"{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
     return Response(
         content=zip_buf.getvalue(),
         media_type="application/zip",
