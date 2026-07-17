@@ -252,7 +252,8 @@ def _chunk_to_csv_bytes(rows):
     writer = csv.writer(buf)
     writer.writerow(ATALLY_HEADERS)
     writer.writerows(rows)
-    return b"\xef\xbb\xbf" + buf.getvalue().encode("utf-8")
+    # AtallyのCSV取込はBOM無しUTF-8を要求（BOMが付くと先頭ヘッダー「求人タイトル」が一致しない）
+    return buf.getvalue().encode("utf-8")
 
 
 def convert_jobbudy_to_atally(job_bytes, source_filename="求人一覧", chunk_size=CHUNK_SIZE):

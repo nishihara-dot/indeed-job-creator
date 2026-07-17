@@ -472,7 +472,8 @@ def _export_atally_csv(jobs) -> bytes:
     writer.writerow(ATALLY_HEADERS)
     for job in jobs:
         writer.writerow(_build_atally_row_from_job(job))
-    return b'\xef\xbb\xbf' + output.getvalue().encode("utf-8")
+    # AtallyのCSV取込はBOM無しUTF-8を要求（BOMが付くと先頭ヘッダー「求人タイトル」が一致しない）
+    return output.getvalue().encode("utf-8")
 
 
 @app.post("/api/export")
