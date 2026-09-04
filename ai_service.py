@@ -456,8 +456,11 @@ def generate_job_posting(
     service_type: str = "",
 ) -> dict:
     # 求人種別（人材派遣＝自社名で匿名化 / 人材紹介＝紹介先の社名）
-    if service_type not in ("人材紹介", "人材派遣"):
-        service_type = "人材派遣" if employment_type == "派遣社員" else "人材紹介"
+    # 雇用形態が派遣社員なら必ず人材派遣として扱う
+    if employment_type == "派遣社員":
+        service_type = "人材派遣"
+    elif service_type not in ("人材紹介", "人材派遣"):
+        service_type = "人材紹介"
     is_haken = service_type == "人材派遣"
 
     company_info = scrape_company_info(company_url)

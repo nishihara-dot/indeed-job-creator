@@ -21,10 +21,14 @@ from atally_convert import convert_jobbudy_to_atally, ATALLY_HEADERS, _major_cat
 
 
 def _service_type_of(employment_type: str, service_type: str = "") -> str:
-    """求人種別を決定。明示指定が無ければ雇用形態から推定（派遣社員→人材派遣、他→人材紹介）。"""
+    """求人種別を決定。
+    雇用形態が派遣社員なら必ず人材派遣（求人種別の指定より優先）。
+    それ以外は明示された求人種別、無ければ人材紹介。"""
+    if employment_type == "派遣社員":
+        return "人材派遣"
     if service_type in ("人材紹介", "人材派遣"):
         return service_type
-    return "人材派遣" if employment_type == "派遣社員" else "人材紹介"
+    return "人材紹介"
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -310,8 +314,9 @@ def generate(req: GenerateRequest, db: Session = Depends(get_db)):
         haken_address = ""
         haken_notes = ""
         if service_type == "人材派遣":
-            haken_name = _setting("haken_company_name")
-            haken_address = _setting("haken_address")
+            # 設定タブに派遣元会社名が無ければ自社（コノ街デザイン）を既定に
+            haken_name = _setting("haken_company_name") or AGENCY_NAME
+            haken_address = _setting("haken_address") or AGENCY_ADDRESS
             haken_notes = _setting("haken_notes")
 
         result = generate_job_posting(
@@ -392,16 +397,14 @@ def _build_other(job) -> str:
     service_type = _service_type_of(job.employment_type or "", getattr(job, "service_type", "") or "")
 
     if service_type == "人材派遣":
-        # 派遣元（自社）情報を記載
-        haken_lines = []
-        if job.haken_company_name:
-            haken_lines.append(f"派遣元事業者名：{job.haken_company_name}")
-        if job.haken_address:
-            haken_lines.append(f"派遣元住所：{job.haken_address}")
+        # 派遣元（自社）情報を記載。未設定なら自社（コノ街デザイン）を既定に
+        haken_lines = [
+            f"派遣元事業者名：{job.haken_company_name or AGENCY_NAME}",
+            f"派遣元住所：{job.haken_address or AGENCY_ADDRESS}",
+        ]
         if job.haken_notes:
             haken_lines.append(job.haken_notes)
-        if haken_lines:
-            parts.append("\n".join(haken_lines))
+        parts.append("\n".join(haken_lines))
     else:
         # 人材紹介：紹介先企業＋職業紹介事業者（自社）の定型文を記載
         location = "".join(filter(None, [job.prefecture or "", job.city or ""]))
