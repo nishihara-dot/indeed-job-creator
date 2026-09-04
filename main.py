@@ -42,7 +42,15 @@ with engine.connect() as _conn:
         except Exception:
             pass
 
+APP_VERSION = "2026-07-17-haken-fix"  # デプロイ確認用（更新するたびに変える）
+
 app = FastAPI(title="Indeed求人作る君", version="1.0.0")
+
+
+@app.get("/api/version")
+def api_version():
+    return {"version": APP_VERSION}
+
 
 app.add_middleware(
     CORSMiddleware,
