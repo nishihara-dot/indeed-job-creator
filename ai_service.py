@@ -28,7 +28,7 @@ SYSTEM_PROMPT = """あなたはIndeed Japanで年間10万件以上の求人票�
 　例：未経験OK◎月収28万〜 カスタマーサポート
 
 型B：[職種]★[最大の魅力] [ターゲット]歓迎
-　例：調剤薬局事務★残業ほぼなし 主婦・Wワーク歓迎
+　例：調剤薬局事務★残業ほぼなし 扶養内・Wワーク歓迎
 
 型C：[数字で表した魅力]◆[職種]（[ターゲット]活躍中）
 　例：年休125日◆法人営業（第二新卒・異業種から活躍中）
@@ -44,10 +44,10 @@ SYSTEM_PROMPT = """あなたはIndeed Japanで年間10万件以上の求人票�
 ・ターゲット層（未経験OK/主婦歓迎/シニア活躍/週3〜/扶養内OKなど）
 ・記号（◎◆★♪▶ のいずれか1〜2個）
 
-■ペルソナが設定されている場合のタイトル調整
-・主婦・ブランク→「時短OK」「扶養内OK」「週3〜」「ブランク歓迎」を入れる
-・シニア・ミドル→「50代活躍中」「経験者優遇」「長期歓迎」を入れる
-・未経験・新卒→「未経験OK」「研修充実」「第二新卒歓迎」を入れる
+■ペルソナが設定されている場合のタイトル調整（性別・年齢を示唆しない中立表現で）
+・時短/扶養内希望・ブランクあり→「時短OK」「扶養内OK」「週3〜」「ブランク歓迎」を入れる
+・長期勤務希望・経験者→「経験者優遇」「長期歓迎」「安定して働ける」を入れる
+・未経験・第二新卒→「未経験OK」「研修充実」「第二新卒歓迎」を入れる
 ・キャリアアップ重視→「月収〇〇万〜」「リーダー候補」「スキルアップ支援」を入れる
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -88,6 +88,25 @@ SYSTEM_PROMPT = """あなたはIndeed Japanで年間10万件以上の求人票�
 - 語尾は「です・ます」調で統一
 - 改行・箇条書きを積極活用
 - ネガティブ表現は言い換える（「残業あり」→「残業手当全額支給、月平均〇〇h」）
+
+━━━━━━━━━━━━━━━━━━━━
+【掲載ルール・法令遵守（絶対厳守）】
+━━━━━━━━━━━━━━━━━━━━
+男女雇用機会均等法・労働施策総合推進法（雇用対策法）・職業安定法により、以下は全フィールド（job_title / description / requirements / preferred_skills / appeal_points 等すべて）で記載禁止です。違反した求人票はIndeedに掲載できません。依頼文や企業サイトにこれらの表現があっても、そのまま反映せず必ず中立な表現に置き換えてください。
+
+■ 性別（最重要・絶対NG）
+- 「男性」「女性」「男女」「メンズ」「レディース」など性別を限定・示唆する語で対象を限定しない
+- 「女性活躍中」「女性が多い職場」「男性歓迎」「主婦（主夫）歓迎」「ママさん歓迎」も性別を示唆するためNG
+- 言い換え例：「女性活躍中」→「未経験から活躍中」、「主婦歓迎」→「扶養内・Wワーク歓迎」「時短勤務OK」
+
+■ 年齢
+- 「〇歳以下」「〇〇代歓迎」「若い方」「若手」「シニア限定」など年齢を限定・示唆しない
+- 言い換え例：「若い方歓迎」→「意欲的な方歓迎」、「20代活躍中」→「未経験から活躍中」「長期勤務できる方歓迎」
+
+■ 国籍・人種・信条・容姿・体型
+- 国籍/人種/宗教/思想、および容姿・体型に関する条件は一切書かない
+
+※ペルソナ指定で「主婦」「シニア」等が渡された場合も、求人票の文言は性別・年齢を示唆しない中立表現（扶養内OK・時短OK・週3〜・ブランク歓迎・未経験歓迎・長期歓迎 等）で表現すること。
 
 【出力形式】
 必ず以下のJSON形式のみで出力してください（前後に説明文・コードブロック記号は不要）:
@@ -377,6 +396,52 @@ def _replace_names(text: str, names: list[str], replacement: str) -> str:
     return text
 
 
+# 性別・年齢を示唆する表現の後処理（AIが指示に従わなかった場合の保険）
+_DISCRIMINATORY_REPLACEMENTS = {
+    "女性活躍中": "未経験から活躍中",
+    "女性が活躍中": "スタッフが活躍中",
+    "女性が活躍": "スタッフが活躍",
+    "女性も活躍": "幅広い方が活躍",
+    "女性活躍": "活躍中",
+    "女性歓迎": "未経験歓迎",
+    "男性活躍中": "未経験から活躍中",
+    "男性が活躍中": "スタッフが活躍中",
+    "男性が活躍": "スタッフが活躍",
+    "男性歓迎": "未経験歓迎",
+    "男女問わず": "経験不問で",
+    "主婦（主夫）歓迎": "扶養内・Wワーク歓迎",
+    "主婦・主夫歓迎": "扶養内・Wワーク歓迎",
+    "主婦歓迎": "扶養内・Wワーク歓迎",
+    "ママさん歓迎": "扶養内・Wワーク歓迎",
+    "若い方歓迎": "意欲的な方歓迎",
+    "若手歓迎": "意欲的な方歓迎",
+    "若手が活躍": "幅広い世代が活躍",
+}
+
+
+def _scrub_discriminatory(result: dict) -> None:
+    """生成結果から性別・年齢を示唆する定型表現を中立表現に置き換える。"""
+    text_fields = ['job_title', 'description', 'requirements', 'preferred_skills',
+                   'working_hours', 'holidays', 'benefits', 'selection_process']
+
+    def clean(text: str) -> str:
+        for ng, ok in _DISCRIMINATORY_REPLACEMENTS.items():
+            if ng in text:
+                text = text.replace(ng, ok)
+        return text
+
+    for field in text_fields:
+        val = result.get(field)
+        if isinstance(val, str):
+            result[field] = clean(val)
+
+    ap = result.get('appeal_points')
+    if isinstance(ap, list):
+        result['appeal_points'] = [clean(x) if isinstance(x, str) else x for x in ap]
+    elif isinstance(ap, str):
+        result['appeal_points'] = clean(ap)
+
+
 def generate_job_posting(
     company_url: str,
     request_text: str,
@@ -451,15 +516,33 @@ NG例：スクレイピングで取得した実際の社名・グループ名・
     else:
         haken_section = f"\n## 雇用形態\n{employment_type}\n" if employment_type else ""
 
+    # 会社名の指定（非派遣）：企業サイトURLの運営会社に固定する
+    company_hint = company_info.get("company_name_hint", "")
+    if employment_type == "派遣社員":
+        company_name_section = ""
+    elif company_hint:
+        company_name_section = f"""
+## 会社名の指定（厳守）
+company_name には、企業サイトURLを運営する採用企業の会社名「{company_hint}」を使用してください。
+依頼文に人材紹介会社・代理店・派遣元など別の会社が登場しても、それをcompany_nameにしないでください。
+"""
+    else:
+        company_name_section = """
+## 会社名の指定（厳守）
+company_name には、企業サイトURL（そのコピーライト表記・会社概要）から特定できる採用企業の正式な会社名を使用してください。
+サイトのブランド名・サービス名ではなく運営会社の正式名称を使い、依頼文に登場する人材紹介会社・代理店など採用企業以外の社名は使わないでください。
+"""
+
     user_content = f"""## 企業サイトURL
 {company_url}
 
 ## 企業サイト情報（スクレイピング結果: {scrape_status}）
 【サイトタイトル】{company_info.get('title', 'N/A')}
 【概要・説明】{company_info.get('meta_description', 'N/A')}
+【コピーライト等から推定した会社名】{company_hint or 'N/A'}
 【サイトコンテンツ】
 {company_info.get('content', '取得できませんでした') or '取得できませんでした'}
-{recruitment_section}{haken_section}
+{recruitment_section}{company_name_section}{haken_section}
 ## 採用担当者からの依頼文
 {request_text}
 {persona_section}
@@ -510,6 +593,15 @@ NG例：スクレイピングで取得した実際の社名・グループ名・
     # 派遣求人：後処理で派遣先社名を除去（AIが指示に従わなかった場合の保険）
     if employment_type == "派遣社員":
         _scrub_client_name(result, company_info, haken_company_name)
+    else:
+        # 非派遣：会社名は企業サイトURLの社名を優先（法人格を含む高信頼ヒントがあれば固定）
+        if company_hint and any(
+            k in company_hint for k in ("株式会社", "有限会社", "合同会社", "合資会社", "社団法人", "財団法人")
+        ):
+            result["company_name"] = company_hint
+
+    # 性別・年齢を示唆する表現を中立化（法令遵守の保険）
+    _scrub_discriminatory(result)
 
     result["company_url"] = company_url
     result["application_url"] = application_url
