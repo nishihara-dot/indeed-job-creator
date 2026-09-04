@@ -43,6 +43,20 @@
           </div>
 
           <div class="form-group">
+            <label>求人種別 <span class="optional">任意</span></label>
+            <select id="service_type_gen" onchange="onGenServiceTypeChange()">
+              <option value="人材紹介">人材紹介（紹介先企業の情報を掲載）</option>
+              <option value="人材派遣">人材派遣（自社名で掲載・派遣先は匿名化）</option>
+            </select>
+            <div id="service-shokai-note" class="field-hint">
+              🤝 人材紹介：会社名は紹介先企業（企業URLの会社）になり、募集要項に「紹介先企業」＋「職業紹介事業者（自社）」情報が入ります。
+            </div>
+            <div id="service-haken-note" class="field-hint haken-note" style="display:none">
+              🏢 人材派遣：派遣先企業名は「大手メーカー」等に匿名化され、会社名は設定済みの派遣元（自社）会社名になります。
+            </div>
+          </div>
+
+          <div class="form-group">
             <label>雇用形態 <span class="optional">任意</span></label>
             <select id="employment_type_gen" onchange="onGenEmploymentTypeChange()">
               <option value="">（AIに判断させる）</option>

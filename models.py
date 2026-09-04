@@ -39,6 +39,7 @@ class JobPosting(Base):
     haken_address = Column(String(500), nullable=True)
     haken_notes = Column(Text, nullable=True)
     job_category = Column(String(100), nullable=True)
+    service_type = Column(String(20), nullable=True)  # 人材紹介 / 人材派遣
     original_request = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(

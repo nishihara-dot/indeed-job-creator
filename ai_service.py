@@ -453,7 +453,13 @@ def generate_job_posting(
     target_persona: str = "",
     employment_type: str = "",
     haken_company_name: str = "",
+    service_type: str = "",
 ) -> dict:
+    # 求人種別（人材派遣＝自社名で匿名化 / 人材紹介＝紹介先の社名）
+    if service_type not in ("人材紹介", "人材派遣"):
+        service_type = "人材派遣" if employment_type == "派遣社員" else "人材紹介"
+    is_haken = service_type == "人材派遣"
+
     company_info = scrape_company_info(company_url)
     scrape_status = "取得成功" if company_info["success"] else f"取得失敗（{company_info.get('error', '不明')}）"
 
@@ -485,7 +491,7 @@ def generate_job_posting(
 - ペルソナが重視する条件（時間・給与・環境など）を前面に出す
 """ if target_persona else ""
 
-    if employment_type == "派遣社員":
+    if is_haken:
         haken_name_instruction = f'company_name には必ず派遣元会社名「{haken_company_name}」を使用してください。' if haken_company_name else "company_name には派遣元（登録先）会社名を使用してください。"
         site_title = company_info.get('title', '')
         avoid_hint = f'特に「{site_title}」に含まれる企業名・グループ名・ブランド名は一切使用禁止です。' if site_title else ''
@@ -518,7 +524,7 @@ NG例：スクレイピングで取得した実際の社名・グループ名・
 
     # 会社名の指定（非派遣）：企業サイトURLの運営会社に固定する
     company_hint = company_info.get("company_name_hint", "")
-    if employment_type == "派遣社員":
+    if is_haken:
         company_name_section = ""
     elif company_hint:
         company_name_section = f"""
@@ -590,8 +596,8 @@ company_name には、企業サイトURL（そのコピーライト表記・会�
         matched = next((c for c in VALID_JOB_CATEGORIES if ai_cat in c or c in ai_cat), None)
         result["job_category"] = matched or "その他営業"
 
-    # 派遣求人：後処理で派遣先社名を除去（AIが指示に従わなかった場合の保険）
-    if employment_type == "派遣社員":
+    # 人材派遣：後処理で派遣先社名を除去（AIが指示に従わなかった場合の保険）
+    if is_haken:
         _scrub_client_name(result, company_info, haken_company_name)
     else:
         # 非派遣：会社名は企業サイトURLの社名を優先（法人格を含む高信頼ヒントがあれば固定）
@@ -603,6 +609,7 @@ company_name には、企業サイトURL（そのコピーライト表記・会�
     # 性別・年齢を示唆する表現を中立化（法令遵守の保険）
     _scrub_discriminatory(result)
 
+    result["service_type"] = service_type
     result["company_url"] = company_url
     result["application_url"] = application_url
     result["contact_name"] = contact_name

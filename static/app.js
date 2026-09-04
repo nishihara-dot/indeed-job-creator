@@ -86,6 +86,21 @@ function onGenEmploymentTypeChange() {
   note.style.display = sel.value === '派遣社員' ? '' : 'none';
 }
 
+function onGenServiceTypeChange() {
+  const svc = document.getElementById('service_type_gen').value;
+  const isHaken = svc === '人材派遣';
+  document.getElementById('service-haken-note').style.display = isHaken ? '' : 'none';
+  document.getElementById('service-shokai-note').style.display = isHaken ? 'none' : '';
+  // 人材派遣なら雇用形態を派遣社員に自動設定
+  const empSel = document.getElementById('employment_type_gen');
+  if (isHaken) {
+    empSel.value = '派遣社員';
+  } else if (empSel.value === '派遣社員') {
+    empSel.value = '';
+  }
+  onGenEmploymentTypeChange();
+}
+
 // ──────────────────────────────────────────────
 // Persona (multi-select pills)
 // ──────────────────────────────────────────────
@@ -180,6 +195,7 @@ async function generateJob() {
         contact_email: document.getElementById('contact_email').value.trim(),
         target_persona: getTargetPersona(),
         employment_type: document.getElementById('employment_type_gen').value,
+        service_type: document.getElementById('service_type_gen').value,
       }),
     });
     if (!res.ok) {
@@ -259,6 +275,11 @@ async function saveJob() {
     payload.contact_phone = payload.contact_phone || generatedData.contact_phone;
     payload.original_request = generatedData.original_request;
     payload.appeal_points = generatedData.appeal_points;
+    payload.service_type = generatedData.service_type;
+    // 人材派遣の派遣元（自社）情報を引き継ぐ
+    if (generatedData.haken_company_name) payload.haken_company_name = generatedData.haken_company_name;
+    if (generatedData.haken_address) payload.haken_address = generatedData.haken_address;
+    if (generatedData.haken_notes) payload.haken_notes = generatedData.haken_notes;
   }
 
   try {

@@ -16,15 +16,22 @@ from database import get_db, engine
 import models
 from models import JobPosting, Setting
 from ai_service import generate_job_posting
-from bulk_convert import convert_jobbudy_to_indeed
+from bulk_convert import convert_jobbudy_to_indeed, AGENCY_NAME, AGENCY_ADDRESS, BRAND_LINE
 from atally_convert import convert_jobbudy_to_atally, ATALLY_HEADERS, _major_category
+
+
+def _service_type_of(employment_type: str, service_type: str = "") -> str:
+    """求人種別を決定。明示指定が無ければ雇用形態から推定（派遣社員→人材派遣、他→人材紹介）。"""
+    if service_type in ("人材紹介", "人材派遣"):
+        return service_type
+    return "人材派遣" if employment_type == "派遣社員" else "人材紹介"
 
 models.Base.metadata.create_all(bind=engine)
 
 # 既存DBへの列追加マイグレーション
 from sqlalchemy import text as _text
 with engine.connect() as _conn:
-    for _col in ["hire_count INTEGER", "haken_company_name VARCHAR(200)", "haken_address VARCHAR(500)", "haken_notes TEXT", "job_category VARCHAR(100)"]:
+    for _col in ["hire_count INTEGER", "haken_company_name VARCHAR(200)", "haken_address VARCHAR(500)", "haken_notes TEXT", "job_category VARCHAR(100)", "service_type VARCHAR(20)"]:
         try:
             _conn.execute(_text(f"ALTER TABLE job_postings ADD COLUMN {_col}"))
             _conn.commit()
@@ -61,6 +68,7 @@ class GenerateRequest(BaseModel):
     contact_email: str = ""
     target_persona: str = ""
     employment_type: str = ""
+    service_type: str = ""  # 人材紹介 / 人材派遣（未指定なら雇用形態から推定）
 
 
 class JobCreate(BaseModel):
@@ -85,6 +93,7 @@ class JobCreate(BaseModel):
     haken_address: Optional[str] = None
     haken_notes: Optional[str] = None
     job_category: Optional[str] = None
+    service_type: Optional[str] = None
     appeal_points: Optional[str] = None
     application_url: Optional[str] = None
     contact_name: Optional[str] = None
@@ -130,6 +139,7 @@ def job_to_dict(job: JobPosting) -> dict:
         "haken_address": job.haken_address,
         "haken_notes": job.haken_notes,
         "job_category": job.job_category,
+        "service_type": job.service_type,
         "appeal_points": job.appeal_points,
         "application_url": job.application_url,
         "contact_name": job.contact_name,
@@ -290,10 +300,20 @@ def generate(req: GenerateRequest, db: Session = Depends(get_db)):
     if not req.request_text.strip():
         raise HTTPException(status_code=400, detail="依頼文を入力してください")
     try:
+        service_type = _service_type_of(req.employment_type, req.service_type)
+
+        def _setting(key: str) -> str:
+            row = db.query(Setting).filter(Setting.key == key).first()
+            return row.value if row and row.value else ""
+
         haken_name = ""
-        if req.employment_type == "派遣社員":
-            haken_row = db.query(Setting).filter(Setting.key == "haken_company_name").first()
-            haken_name = haken_row.value if haken_row else ""
+        haken_address = ""
+        haken_notes = ""
+        if service_type == "人材派遣":
+            haken_name = _setting("haken_company_name")
+            haken_address = _setting("haken_address")
+            haken_notes = _setting("haken_notes")
+
         result = generate_job_posting(
             company_url=req.company_url,
             request_text=req.request_text,
@@ -305,7 +325,14 @@ def generate(req: GenerateRequest, db: Session = Depends(get_db)):
             target_persona=req.target_persona,
             employment_type=req.employment_type,
             haken_company_name=haken_name,
+            service_type=service_type,
         )
+        # 求人種別と派遣元情報を結果に含めて保存できるようにする
+        result["service_type"] = service_type
+        if service_type == "人材派遣":
+            result.setdefault("haken_company_name", haken_name)
+            result["haken_address"] = haken_address
+            result["haken_notes"] = haken_notes
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -361,7 +388,11 @@ def _build_other(job) -> str:
     parts = []
     if job.selection_process:
         parts.append(job.selection_process)
-    if job.employment_type == "派遣社員":
+
+    service_type = _service_type_of(job.employment_type or "", getattr(job, "service_type", "") or "")
+
+    if service_type == "人材派遣":
+        # 派遣元（自社）情報を記載
         haken_lines = []
         if job.haken_company_name:
             haken_lines.append(f"派遣元事業者名：{job.haken_company_name}")
@@ -371,6 +402,26 @@ def _build_other(job) -> str:
             haken_lines.append(job.haken_notes)
         if haken_lines:
             parts.append("\n".join(haken_lines))
+    else:
+        # 人材紹介：紹介先企業＋職業紹介事業者（自社）の定型文を記載
+        location = "".join(filter(None, [job.prefecture or "", job.city or ""]))
+        lines = [
+            BRAND_LINE,
+            "【事業内容】 人材派遣・職業紹介",
+            "",
+            "この求人は職業紹介事業者による紹介求人です。",
+            "",
+            "【職業紹介事業者】",
+            f"会社名：{AGENCY_NAME}",
+            f"所在地：{AGENCY_ADDRESS}",
+            "",
+            "【紹介先企業】",
+            f"会社名：{job.company_name or ''}",
+        ]
+        if location:
+            lines.append(f"所在地：{location}")
+        parts.append("\n".join(lines))
+
     return "\n\n".join(parts)
 
 
