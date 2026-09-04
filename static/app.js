@@ -621,6 +621,8 @@ async function regenerateInModal() {
         contact_name: '',
         contact_phone: '',
         contact_email: val('m_contact_email'),
+        employment_type: val('m_employment_type'),
+        service_type: val('m_service_type'),
       }),
     });
     if (!res.ok) {
@@ -638,6 +640,7 @@ async function regenerateInModal() {
     fields.forEach(f => setVal('m_' + f, data[f] || ''));
     setVal('m_salary_min', data.salary_min || '');
     setVal('m_salary_max', data.salary_max || '');
+    if (data.service_type) setVal('m_service_type', data.service_type);
 
     toast('再生成しました。内容を確認して保存してください', 'success');
   } catch (e) {
@@ -669,6 +672,7 @@ function openEdit(id) {
   setVal('m_salary_min', job.salary_min || '');
   setVal('m_salary_max', job.salary_max || '');
   setVal('m_hire_count', job.hire_count || '');
+  setVal('m_service_type', job.service_type || (job.employment_type === '派遣社員' ? '人材派遣' : '人材紹介'));
   toggleHakenSection('m');
 
   document.getElementById('edit-modal').classList.add('open');
@@ -700,6 +704,7 @@ async function saveEdit() {
     hire_count: intOrNull('m_hire_count'),
     contact_email: val('m_contact_email'),
     application_url: val('m_application_url'),
+    service_type: val('m_service_type'),
   };
 
   try {
