@@ -599,11 +599,13 @@ company_name には、企業サイトURL（そのコピーライト表記・会�
     # 人材派遣：後処理で派遣先社名を除去（AIが指示に従わなかった場合の保険）
     if is_haken:
         _scrub_client_name(result, company_info, haken_company_name)
+        # 派遣は会社名を必ず派遣元（設定した会社名）にする
+        if haken_company_name:
+            result["company_name"] = haken_company_name
     else:
-        # 非派遣：会社名は企業サイトURLの社名を優先（法人格を含む高信頼ヒントがあれば固定）
-        if company_hint and any(
-            k in company_hint for k in ("株式会社", "有限会社", "合同会社", "合資会社", "社団法人", "財団法人")
-        ):
+        # 人材紹介：会社名は紹介先（企業サイトURLの会社）にする。
+        # company_name_hint は必ず法人格を含む社名なので、取得できていれば固定する。
+        if company_hint:
             result["company_name"] = company_hint
 
     # 性別・年齢を示唆する表現を中立化（法令遵守の保険）
